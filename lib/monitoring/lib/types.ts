@@ -9,7 +9,7 @@ export interface TableItem {
 }
 
 export interface ListFunctionResponse {
-  Functions: FunctionItem[]
+  Functions: FunctionItem[];
 }
 
 export interface ListTableResponse {
