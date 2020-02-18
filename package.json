@@ -17,12 +17,14 @@
     "build": "tsc -p ."
   },
   "dependencies": {
+    "diff": "^4.0.2",
     "handlebars": "^4.7.3",
     "js-yaml": "^3.13.1",
     "micromatch": "^4.0.2",
     "yargs": "^15.1.0"
   },
   "devDependencies": {
+    "@types/diff": "^4.0.2",
     "@types/js-yaml": "^3.12.2",
     "@types/micromatch": "^4.0.1",
     "@types/node": "^13.7.0",

@@ -14,44 +14,75 @@ import * as cfn from '@aws-cdk/aws-cloudformation';
 // Config interface for proper typescript support
 //
 
-interface ConfigLambdaAlarm {
+export interface ConfigCLI {
+  version: number;
+  profile: string;
+  services: string[];
+  includes: string[];
+  excludes: string[];
+}
+
+export interface ConfigLambdaAlarm {
   threshold: number;
   evaluationPeriods: number;
 }
 
-interface ConfigLambdaAlarms {
+export interface ConfigLambdaAlarms {
   [key: string]: ConfigLambdaAlarm;
 }
 
-interface ConfigLambda {
+export interface ConfigLambda {
   arn: string;
-  name: string;
-  config: ConfigLambdaAlarms;
+  config?: ConfigLambdaAlarms;
 }
 
-interface ConfigSNS {
+export interface ConfigLambdaAll {
+  [key: string]: ConfigLambda
+}
+
+export interface ConfigTableAlarm {
+  threshold: number;
+  evaluationPeriods: number;
+}
+
+export interface ConfigTableAlarms {
+  [key: string]: ConfigTableAlarm;
+}
+
+export interface ConfigTable {
+  arn: string;
+  config?: ConfigTableAlarms;
+}
+
+export interface ConfigTableAll {
+  [key: string]: ConfigTable
+}
+
+export interface ConfigSNS {
   id: string;
   name: string;
   emails?: string[];
-  endpoints: string[];
+  endpoints?: string[];
 }
 
-interface ConfigCustomDefault {
+export interface ConfigCustomDefault {
   lambda: ConfigLambdaAlarms;
 }
 
-interface ConfigCustomSNS {
+export interface ConfigCustomSNS {
   alarm: ConfigSNS;
   ok: ConfigSNS;
 }
 
-interface ConfigCustom {
+export interface ConfigCustom {
   default: ConfigCustomDefault;
   snsTopics: ConfigCustomSNS;
 }
 
-interface Config {
-  lambdas: ConfigLambda[];
+export interface Config {
+  cli: ConfigCLI;
+  lambdas: ConfigLambdaAll;
+  tables: ConfigTableAll;
   custom: ConfigCustom;
 }
 
@@ -100,9 +131,9 @@ function setupSNS(stack: cdk.Stack, config: ConfigSNS): sns.ITopic {
 }
 
 // Alarm setup helper function
-function setupAlarm(stack: cdk.Stack, config: ConfigLambda, metric: cw.Metric, configKey: string, topicActions: SNSActions): void {
+function setupAlarm(stack: cdk.Stack, name: string, config: ConfigLambda, metric: cw.Metric, configKey: string, topicActions: SNSActions): void {
   // Create alarm
-  const alarm = new cw.Alarm(stack, `${config.name}-${configKey}`, {
+  const alarm = new cw.Alarm(stack, `${name}-${configKey}`, {
     metric,
     threshold: 100,
     evaluationPeriods: 2,
@@ -136,15 +167,17 @@ class MonitoringStack extends cdk.Stack {
     };
 
     // Setup lambdas
-    conf.lambdas.forEach(l => {
+    Object.keys(conf.lambdas).forEach(name => {
+      const l = conf.lambdas[name];
+
       // Load lambda from existing arn
-      const fn = lambda.Function.fromFunctionArn(this, l.name, l.arn);
+      const fn = lambda.Function.fromFunctionArn(this, name, l.arn);
 
       // Setup lambda alarms
-      setupAlarm(this, l, fn.metricErrors(), 'errors', topicActions);
-      setupAlarm(this, l, fn.metricInvocations(), 'invocations', topicActions);
-      setupAlarm(this, l, fn.metricDuration(), 'duration', topicActions);
-      setupAlarm(this, l, fn.metricThrottles(), 'throttles', topicActions);
+      setupAlarm(this, name, l, fn.metricErrors(), 'errors', topicActions);
+      setupAlarm(this, name, l, fn.metricInvocations(), 'invocations', topicActions);
+      setupAlarm(this, name, l, fn.metricDuration(), 'duration', topicActions);
+      setupAlarm(this, name, l, fn.metricThrottles(), 'throttles', topicActions);
     });
   }
 }

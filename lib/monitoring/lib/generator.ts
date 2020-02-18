@@ -1,9 +1,9 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import * as yaml from 'js-yaml';
 import * as hb from 'handlebars';
 
 import { TableItem, FunctionItem, Args } from './types';
+import * as conf from './config';
 
 export const generatePath = (profile: string): string => {
   return path.join(process.cwd(), `${profile}-monitoring`);
@@ -17,43 +17,9 @@ const generateFromTemplateFile = async (profile: string, templatePath: string, o
   await fs.promises.writeFile(filePath, template(options));
 };
 
-export const generateConfig = async (functions: FunctionItem[], tables: TableItem[], args: Args): Promise<void> => {
-  const obj = {
-    cli: {
-      version: 1,
-      profile: args.profile,
-      services: args.service,
-      includes: args.include,
-      excludes: args.exclude,
-    },
-    lambdas: functions.map(f => ({ name: f.FunctionName, arn: f.FunctionArn })),
-    tables: tables.map(t => ({ name: t.TableName, arn: t.TableArn })),
-    custom: {
-      default: {
-        lambda: {
-          errors: {
-            threshold: 100,
-            evaluationPeriods: 2,
-          },
-        },
-      },
-      snsTopics: {
-        alarm: {
-          name: 'Alarm switched to error state',
-          id: `${args.profile}-alarm-error`,
-          endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
-        },
-        ok: {
-          name: 'Alarm switched to ok state',
-          id: `${args.profile}-alarm-ok`,
-          endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
-        },
-      },
-    },
-  };
-
+const generateConfig = async (functions: FunctionItem[], tables: TableItem[], args: Args): Promise<void> => {
   const filePath = path.join(generatePath(args.profile), 'config.yml');
-  return fs.promises.writeFile(filePath, yaml.dump(obj));
+  return fs.promises.writeFile(filePath, conf.dumpNewConfig(functions, tables, args));
 };
 
 export const logGenerateSuccess = (functions: FunctionItem[], tables: TableItem[], args: Args): void => {
