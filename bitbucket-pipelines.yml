@@ -1,0 +1,15 @@
+image: node:12
+
+definitions:
+  steps:
+    - step: &lint
+        name: lint
+        caches:
+          - node
+        script:
+          - npm install
+          - npm lint
+
+pipelines:
+  default:
+    - step: *lint
