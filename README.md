@@ -6,7 +6,8 @@ CLI to help automating MCA work
 
 1. Clone repository
 2. Run `npm install`
-3. Run `npm link`
+3. Run `npm build`
+4. Run `npm link`
 
 ## Local development
 
