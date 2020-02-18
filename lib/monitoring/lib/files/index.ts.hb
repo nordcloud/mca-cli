@@ -33,6 +33,7 @@ interface ConfigSNS {
   id: string;
   name: string;
   emails?: string[];
+  endpoints: string[];
 }
 
 interface ConfigCustomDefault {
@@ -40,8 +41,8 @@ interface ConfigCustomDefault {
 }
 
 interface ConfigCustomSNS {
-  alarm: ConfigSNS
-  ok: ConfigSNS
+  alarm: ConfigSNS;
+  ok: ConfigSNS;
 }
 
 interface ConfigCustom {
@@ -73,11 +74,11 @@ interface SNSActions {
 //
 
 // Load config file
-const conf: Config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
+const conf: Config = yaml.safeLoad(fs.readFileSync('config.yml', 'utf8'));
 
 // Setup SNS
 function setupSNS(stack: cdk.Stack, config: ConfigSNS): sns.ITopic {
-  const { id, name, emails = [] } = config;
+  const { id, name, emails = [], endpoints = [] } = config;
 
   // Create topic
   const topic = new sns.Topic(stack, `${id}-topic`, {
@@ -87,27 +88,31 @@ function setupSNS(stack: cdk.Stack, config: ConfigSNS): sns.ITopic {
 
   // Add email addresses
   emails.forEach(email => {
-    topic.addSubscription(new snsSub.EmailSubscription(email))
-  })
+    topic.addSubscription(new snsSub.EmailSubscription(email));
+  });
+
+  // Add endpoints
+  endpoints.forEach(endpoint => {
+    topic.addSubscription(new snsSub.UrlSubscription(endpoint));
+  });
 
   return topic;
 }
 
-
 // Alarm setup helper function
-function setupAlarm(stack: cdk.Stack, config: ConfigLambda, metric: cw.Metric, configKey: string, topicActions: SNSActions) {
+function setupAlarm(stack: cdk.Stack, config: ConfigLambda, metric: cw.Metric, configKey: string, topicActions: SNSActions): void {
   // Create alarm
   const alarm = new cw.Alarm(stack, `${config.name}-${configKey}`, {
     metric,
     threshold: 100,
     evaluationPeriods: 2,
     ...(conf?.custom?.default?.lambda[configKey] || {}),
-    ...(config?.config[configKey] || {}),
+    ...(config?.config ? config.config[configKey] || {} : {}),
   });
 
   // Add actions for alarm
-  alarm.addAlarmAction(topicActions.alarm)
-  alarm.addOkAction(topicActions.ok)
+  alarm.addAlarmAction(topicActions.alarm);
+  alarm.addOkAction(topicActions.ok);
 }
 
 //
@@ -131,7 +136,7 @@ class MonitoringStack extends cdk.Stack {
     };
 
     // Setup lambdas
-    conf.lambdas.forEach((l) => {
+    conf.lambdas.forEach(l => {
       // Load lambda from existing arn
       const fn = lambda.Function.fromFunctionArn(this, l.name, l.arn);
 
@@ -140,10 +145,10 @@ class MonitoringStack extends cdk.Stack {
       setupAlarm(this, l, fn.metricInvocations(), 'invocations', topicActions);
       setupAlarm(this, l, fn.metricDuration(), 'duration', topicActions);
       setupAlarm(this, l, fn.metricThrottles(), 'throttles', topicActions);
-    })
+    });
   }
 }
 
 // Generate monitoring stack
 const app = new cdk.App();
-new MonitoringStack(app, 'Monitoring');
+new MonitoringStack(app, 'mca-monitoring');
