@@ -42,38 +42,44 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
 
 export const dumpNewConfig = (functions: FunctionItem[], tables: TableItem[], args: Args): string => {
   return yaml.dump(createConfig(functions, tables, args));
-}
+};
 
 export const loadConfig = async (configPath: string): Promise<Config> => {
   const buffer = await fs.promises.readFile(configPath);
   const obj = yaml.load(buffer.toString());
   return obj;
-}
+};
 
 export const combineConfig = (configOld: Config, configNew: Config): Config => {
-  configNew.lambdas = Object.keys(configNew.lambdas).reduce((acc, key) => ({
-    ...acc,
-    [key]: {
-      ...(configOld?.lambdas ? configOld.lambdas[key] || {} : {}),
-      ...(configNew?.lambdas ? configNew.lambdas[key] || {} : {})
-    }
-  }), {});
+  configNew.lambdas = Object.keys(configNew.lambdas).reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]: {
+        ...(configOld?.lambdas ? configOld.lambdas[key] || {} : {}),
+        ...(configNew?.lambdas ? configNew.lambdas[key] || {} : {}),
+      },
+    }),
+    {},
+  );
 
-  configNew.tables = Object.keys(configNew.tables).reduce((acc, key) => ({
-    ...acc,
-    [key]: {
-      ...(configOld?.tables ? configOld.tables[key] || {} : {}),
-      ...(configNew?.tables ? configNew.tables[key] || {} : {})
-    }
-  }), {});
+  configNew.tables = Object.keys(configNew.tables).reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]: {
+        ...(configOld?.tables ? configOld.tables[key] || {} : {}),
+        ...(configNew?.tables ? configNew.tables[key] || {} : {}),
+      },
+    }),
+    {},
+  );
 
   return configNew;
-}
+};
 
 export const diffConfig = async (oldConfig: Config, newConfig: Config): Promise<void> => {
   diff(yaml.dump(oldConfig), yaml.dump(newConfig));
-}
+};
 
 export const writeConfig = async (configPath: string, config: Config): Promise<void> => {
   await fs.promises.writeFile(configPath, yaml.dump(config));
-}
+};

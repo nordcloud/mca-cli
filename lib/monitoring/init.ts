@@ -12,31 +12,31 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
     })
     .options({
-      'i': {
+      i: {
         alias: 'include',
         describe: 'List of included arns',
         type: 'array',
         default: [],
       },
-      'e': {
+      e: {
         alias: 'exclude',
         describe: 'List of excluded arns',
         type: 'array',
         default: [],
       },
-      's': {
+      s: {
         alias: 'service',
         describe: 'List of services',
         type: 'array',
         choices: ['lambda', 'dynamodb'],
         default: ['lambda', 'dynamodb'],
       },
-      'd': {
+      d: {
         alias: 'dry',
         default: false,
         type: 'boolean',
-      }
-    })
+      },
+    });
 };
 
 export const handler = async (args: Args): Promise<void> => {

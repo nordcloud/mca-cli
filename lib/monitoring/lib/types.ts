@@ -52,7 +52,7 @@ export interface ConfigLambda {
 }
 
 export interface ConfigLambdaAll {
-  [key: string]: ConfigLambda
+  [key: string]: ConfigLambda;
 }
 
 export interface ConfigTableAlarm {
@@ -70,7 +70,7 @@ export interface ConfigTable {
 }
 
 export interface ConfigTableAll {
-  [key: string]: ConfigTable
+  [key: string]: ConfigTable;
 }
 
 export interface ConfigSNS {
