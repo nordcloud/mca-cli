@@ -2,6 +2,13 @@ image: node:12
 
 definitions:
   steps:
+    - step: &test
+        name: test
+        caches:
+          - node
+        script:
+          - npm install
+          - npm run test
     - step: &lint
         name: lint
         caches:
@@ -12,4 +19,6 @@ definitions:
 
 pipelines:
   default:
-    - step: *lint
+    - parallel:
+        - step: *test
+        - step: *lint
