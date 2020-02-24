@@ -1,33 +1,6 @@
-export interface FunctionItem {
-  FunctionName: string;
-  FunctionArn: string;
-}
-
-export interface TableItem {
-  TableName: string;
-  TableArn: string;
-}
-
-export interface ListFunctionResponse {
-  Functions: FunctionItem[];
-}
-
-export interface ListTableResponse {
-  TableNames: string[];
-}
-
-export interface DescribeTableResponse {
-  Table: TableItem;
-}
-
-export interface Args {
-  config: string;
-  profile: string;
-  service: string[];
-  include: string[];
-  exclude: string[];
-  dry: boolean;
-}
+import * as path from 'path';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
 
 export interface ConfigCLI {
   version: number;
@@ -76,7 +49,7 @@ export interface AlarmOptions {
   readonly treatMissingData?: string;
 }
 
-export type DimensionHash = {[dim: string]: any};
+export type DimensionHash = { [dim: string]: any };
 
 export interface MetricDuration {
   milliseconds?: number;
@@ -91,7 +64,7 @@ export interface MetricOptions {
   /**
    * The period over which the specified statistic is applied.
    */
-  readonly period?: MetricDuration,
+  readonly period?: MetricDuration;
 
   /**
    * What function to use for aggregating.
@@ -155,13 +128,17 @@ export interface ConfigLocals {
   [key: string]: ConfigLocal;
 }
 
+export interface ConfigCustomDefaultLambda {
+  alarm: ConfigAlarms;
+}
+
 export interface ConfigCustomDefaultTable {
   alarm: ConfigAlarms;
   metric: ConfigMetrics;
 }
 
 export interface ConfigCustomDefaults {
-  lambda: ConfigAlarms;
+  lambda: ConfigCustomDefaultLambda;
   table: ConfigCustomDefaultTable;
 }
 
@@ -183,3 +160,25 @@ export interface Config {
   tables: ConfigLocals;
   custom: ConfigCustom;
 }
+
+const configPath = path.join(__dirname, '..', 'config.yml');
+const configBuffer = fs.readFileSync(configPath);
+
+// Load config file
+export const configFile: Config = yaml.safeLoad(configBuffer.toString());
+
+export const getLambdas = (): ConfigLocals => {
+  return configFile.lambdas || {};
+};
+
+export const getLambda = (name: string): ConfigLocal | undefined => {
+  return getLambdas()[name];
+};
+
+export const getTables = (): ConfigLocals => {
+  return configFile.tables || {};
+};
+
+export const getTable = (name: string): ConfigLocal | undefined => {
+  return getTables()[name];
+};

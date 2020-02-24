@@ -1,7 +1,7 @@
 import * as path from 'path';
-import * as fs from 'fs';
 import * as hb from 'handlebars';
 
+import * as fs from './fsUtil';
 import { TableItem, FunctionItem, Args } from './types';
 import * as conf from './config';
 
@@ -9,17 +9,45 @@ export const generatePath = (profile: string): string => {
   return path.join(process.cwd(), `${profile}-monitoring`);
 };
 
-const generateFromTemplateFile = async (profile: string, templatePath: string, options?: object): Promise<void> => {
-  const fullPath = path.join(__dirname, 'files', templatePath) + '.hb';
-  const content = await fs.promises.readFile(fullPath);
-  const filePath = path.join(generatePath(profile), templatePath);
-  const template = hb.compile(content.toString());
-  await fs.promises.writeFile(filePath, template(options));
-};
+export const getTemplateFiles = async (folder: string): Promise<string[]> => {
+  let files: string[] = [];
+  for (const file of await fs.readdir(folder)) {
+    const filePath = path.join(folder, file);
+    const stat = await fs.lstat(filePath);
+    if (stat.isDirectory()) {
+      const newFiles = await getTemplateFiles(filePath);
+      files = [
+        ...files,
+        ...newFiles,
+      ]
+    } else {
+      files.push(filePath);
+    }
+  }
+  return files;
+}
+
+const generateTemplate = async (templatePath: string, templateFolder: string, args: Args) => {
+  // Read template file content
+  const content = await fs.readFile(templatePath);
+
+  // Generate file path
+  const relativePath = path.relative(templateFolder, templatePath);
+  const filename = path.basename(relativePath, '.hb')
+  const folderPath = path.dirname(relativePath);
+  const filePath = path.join(generatePath(args.profile), folderPath, filename);
+
+  // Create folders
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+
+  // Write file
+  const template = hb.compile(content);
+  await fs.writeFile(filePath, template(args));
+}
 
 const generateConfig = async (functions: FunctionItem[], tables: TableItem[], args: Args): Promise<void> => {
   const filePath = path.join(generatePath(args.profile), 'config.yml');
-  return fs.promises.writeFile(filePath, conf.dumpNewConfig(functions, tables, args));
+  return fs.writeFile(filePath, conf.dumpNewConfig(functions, tables, args));
 };
 
 export const logGenerateSuccess = (functions: FunctionItem[], tables: TableItem[], args: Args): void => {
@@ -37,16 +65,13 @@ export const logGenerateSuccess = (functions: FunctionItem[], tables: TableItem[
 };
 
 export const generateMonitoring = async (functions: FunctionItem[], tables: TableItem[], args: Args): Promise<void> => {
-  await fs.promises.mkdir(generatePath(args.profile), { recursive: true });
+  await fs.mkdir(generatePath(args.profile), { recursive: true });
+
+  const templateFolder = path.join(__dirname, 'template');
+  const filePaths = await getTemplateFiles(templateFolder);
 
   await Promise.all([
-    generateFromTemplateFile(args.profile, 'cdk.context.json'),
-    generateFromTemplateFile(args.profile, 'cdk.json'),
-    generateFromTemplateFile(args.profile, 'index.ts'),
-    generateFromTemplateFile(args.profile, 'package.json', { profile: args.profile }),
-    generateFromTemplateFile(args.profile, 'package-lock.json'),
-    generateFromTemplateFile(args.profile, 'tsconfig.json'),
-    generateFromTemplateFile(args.profile, 'README.md', { profile: args.profile }),
+    ...filePaths.map(p => generateTemplate(p, templateFolder, args)),
     generateConfig(functions, tables, args),
   ]);
 

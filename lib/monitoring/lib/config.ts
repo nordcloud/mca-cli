@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
 
 import { TableItem, FunctionItem, Args, Config } from './types';
@@ -19,22 +19,66 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
       default: {
         lambda: {
           errors: {
-            threshold: 100,
-            evaluationPeriods: 2,
+            threshold: 10,
+            evaluationPeriods: 5,
+          },
+          invocations: {
+            threshold: 200,
+            evaluationPeriods: 5,
+          },
+          duration: {
+            threshold: 2000,
+            evaluationPeriods: 5,
+          },
+          throttles: {
+            threshold: 10,
+            evaluationPeriods: 5,
           },
         },
+        table: {
+          alarm: {
+            ConsumedReadCapasityUnits: {
+              threshold: 10,
+              evaluationPeriods: 5,
+            },
+            ConsumedWriteCapasityUnits: {
+              threshold: 200,
+              evaluationPeriods: 5,
+            },
+            ProvisionedReadCapasity: {
+              threshold: 2000,
+              evaluationPeriods: 5,
+            },
+            ProvisionedWriteCapasity: {
+              threshold: 10,
+              evaluationPeriods: 5,
+            },
+          },
+          metric: {
+            ConsumedReadCapasityUnits: {
+              period: { minutes: 5 },
+              statistic: 'Maximum',
+            },
+            ConsumedWriteCapasityUnits: {
+              period: { minutes: 5 },
+              statistic: 'Maximum',
+            },
+            ProvisionedReadCapasity: {
+              period: { minutes: 5 },
+              statistic: 'Maximum',
+            },
+            ProvisionedWriteCapasity: {
+              period: { minutes: 5 },
+              statistic: 'Maximum',
+            },
+          },
+        }
       },
       snsTopics: {
-        alarm: {
-          name: 'Alarm switched to error state',
-          id: `${args.profile}-alarm-error`,
-          endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
-        },
-        ok: {
-          name: 'Alarm switched to ok state',
-          id: `${args.profile}-alarm-ok`,
-          endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
-        },
+        name: 'Topic for mca monitoring alarms',
+        id: `${args.profile}-alarts-alarm`,
+        endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
+        emails: [],
       },
     },
   };
@@ -45,13 +89,13 @@ export const dumpNewConfig = (functions: FunctionItem[], tables: TableItem[], ar
 };
 
 export const loadConfig = async (configPath: string): Promise<Config> => {
-  const buffer = await fs.promises.readFile(configPath);
-  const obj = yaml.load(buffer.toString());
+  const content = await fs.readFile(configPath);
+  const obj = yaml.load(content);
   return obj;
 };
 
 export const combineConfig = (configOld: Config, configNew: Config): Config => {
-  configNew.lambdas = Object.keys(configNew.lambdas).reduce(
+  configOld.lambdas = Object.keys(configNew.lambdas).reduce(
     (acc, key) => ({
       ...acc,
       [key]: {
@@ -62,7 +106,7 @@ export const combineConfig = (configOld: Config, configNew: Config): Config => {
     {},
   );
 
-  configNew.tables = Object.keys(configNew.tables).reduce(
+  configOld.tables = Object.keys(configNew.tables).reduce(
     (acc, key) => ({
       ...acc,
       [key]: {
@@ -73,13 +117,14 @@ export const combineConfig = (configOld: Config, configNew: Config): Config => {
     {},
   );
 
-  return configNew;
+  return configOld;
 };
 
-export const diffConfig = async (oldConfig: Config, newConfig: Config): Promise<void> => {
-  diff(yaml.dump(oldConfig), yaml.dump(newConfig));
+export const diffConfig = async (configPath: string, newConfig: Config): Promise<void> => {
+  const content = await fs.readFile(configPath);
+  diff(content, yaml.dump(newConfig));
 };
 
 export const writeConfig = async (configPath: string, config: Config): Promise<void> => {
-  await fs.promises.writeFile(configPath, yaml.dump(config));
+  await fs.writeFile(configPath, yaml.dump(config));
 };
