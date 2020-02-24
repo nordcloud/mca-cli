@@ -76,7 +76,7 @@ export interface AlarmOptions {
   readonly treatMissingData?: string;
 }
 
-export type DimensionHash = {[dim: string]: any};
+export type DimensionHash = { [dim: string]: object };
 
 export interface MetricDuration {
   milliseconds?: number;
@@ -91,7 +91,7 @@ export interface MetricOptions {
   /**
    * The period over which the specified statistic is applied.
    */
-  readonly period?: MetricDuration,
+  readonly period?: MetricDuration;
 
   /**
    * What function to use for aggregating.

@@ -72,7 +72,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
               statistic: 'Maximum',
             },
           },
-        }
+        },
       },
       snsTopics: {
         name: 'Topic for mca monitoring alarms',

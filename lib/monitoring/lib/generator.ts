@@ -16,24 +16,21 @@ export const getTemplateFiles = async (folder: string): Promise<string[]> => {
     const stat = await fs.lstat(filePath);
     if (stat.isDirectory()) {
       const newFiles = await getTemplateFiles(filePath);
-      files = [
-        ...files,
-        ...newFiles,
-      ]
+      files = [...files, ...newFiles];
     } else {
       files.push(filePath);
     }
   }
   return files;
-}
+};
 
-const generateTemplate = async (templatePath: string, templateFolder: string, args: Args) => {
+const generateTemplate = async (templatePath: string, templateFolder: string, args: Args): Promise<void> => {
   // Read template file content
   const content = await fs.readFile(templatePath);
 
   // Generate file path
   const relativePath = path.relative(templateFolder, templatePath);
-  const filename = path.basename(relativePath, '.hb')
+  const filename = path.basename(relativePath, '.hb');
   const folderPath = path.dirname(relativePath);
   const filePath = path.join(generatePath(args.profile), folderPath, filename);
 
@@ -43,7 +40,7 @@ const generateTemplate = async (templatePath: string, templateFolder: string, ar
   // Write file
   const template = hb.compile(content);
   await fs.writeFile(filePath, template(args));
-}
+};
 
 const generateConfig = async (functions: FunctionItem[], tables: TableItem[], args: Args): Promise<void> => {
   const filePath = path.join(generatePath(args.profile), 'config.yml');
