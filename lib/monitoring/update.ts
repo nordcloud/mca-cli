@@ -21,20 +21,17 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       alias: 'include',
       describe: 'List of included arns',
       type: 'array',
-      default: [],
     },
     e: {
       alias: 'exclude',
       describe: 'List of excluded arns',
       type: 'array',
-      default: [],
     },
     s: {
       alias: 'service',
       describe: 'List of services',
       type: 'array',
       choices: ['lambda', 'dynamodb'],
-      default: ['lambda', 'dynamodb'],
     },
     d: {
       alias: 'dry',
@@ -46,7 +43,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 
 export const handler = async (args: lib.Args): Promise<void> => {
   const config = await lib.loadConfig(args.config);
-  const combinedArgs = { ...args, ...(config?.cli || {}) };
+  const combinedArgs = { ...(config?.cli || {}), ...args };
   const { profile, service, include, exclude, dry } = combinedArgs;
 
   const functions = service.indexOf('lambda') !== -1 ? await lib.getFunctions(profile, include, exclude) : [];
@@ -55,9 +52,9 @@ export const handler = async (args: lib.Args): Promise<void> => {
   const newConfig = lib.combineConfig(config, lib.createConfig(functions, tables, combinedArgs));
 
   if (dry) {
-    lib.diffConfig(config, newConfig);
+    lib.diffConfig(args.config, newConfig);
     return;
   }
 
-  lib.writeConfig(args.config, newConfig);
+  await lib.writeConfig(args.config, newConfig);
 };
