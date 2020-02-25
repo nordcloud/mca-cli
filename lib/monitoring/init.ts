@@ -12,6 +12,11 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
     })
     .options({
+      o: {
+        alias: 'output',
+        describe: 'Folder to setup monitoring',
+        type: 'string',
+      },
       i: {
         alias: 'include',
         describe: 'List of included arns',

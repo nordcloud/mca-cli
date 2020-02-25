@@ -23,6 +23,7 @@ export interface DescribeTableResponse {
 export interface Args {
   config: string;
   profile: string;
+  output?: string;
   service: string[];
   include: string[];
   exclude: string[];
