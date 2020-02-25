@@ -49,7 +49,7 @@ export interface AlarmOptions {
   readonly treatMissingData?: string;
 }
 
-export type DimensionHash = { [dim: string]: any };
+export type DimensionHash = { [dim: string]: object };
 
 export interface MetricDuration {
   milliseconds?: number;
@@ -110,36 +110,29 @@ export interface MetricOptions {
   readonly color?: string;
 }
 
-export interface ConfigAlarms {
-  [key: string]: AlarmOptions;
+export interface ConfigMetricAlarm {
+  enabled?: boolean;
+  alarm?: AlarmOptions;
+  metric?: MetricOptions;
 }
 
-export interface ConfigMetrics {
-  [key: string]: MetricOptions;
+export interface ConfigMetricAlarms {
+  [key: string]: ConfigMetricAlarm;
 }
 
 export interface ConfigLocal {
   arn: string;
-  alarm: ConfigAlarms;
-  metric: ConfigMetrics;
+  config?: ConfigMetricAlarms;
 }
 
 export interface ConfigLocals {
   [key: string]: ConfigLocal;
 }
 
-export interface ConfigCustomDefaultLambda {
-  alarm: ConfigAlarms;
-}
-
-export interface ConfigCustomDefaultTable {
-  alarm: ConfigAlarms;
-  metric: ConfigMetrics;
-}
-
 export interface ConfigCustomDefaults {
-  lambda: ConfigCustomDefaultLambda;
-  table: ConfigCustomDefaultTable;
+  lambda?: ConfigMetricAlarms;
+  table?: ConfigMetricAlarms;
+  account?: ConfigMetricAlarm;
 }
 
 export interface ConfigCustomSNS {
@@ -175,10 +168,43 @@ export const getLambda = (name: string): ConfigLocal | undefined => {
   return getLambdas()[name];
 };
 
+export const getSelectedLambdas = (names: string[]): ConfigLocals => {
+  return names.reduce((acc, name) => {
+    return { ...acc, [name]: getLambda(name) };
+  }, {});
+};
+
 export const getTables = (): ConfigLocals => {
   return configFile.tables || {};
 };
 
 export const getTable = (name: string): ConfigLocal | undefined => {
   return getTables()[name];
+};
+
+export const getSelectedTables = (names: string[]): ConfigLocals => {
+  return names.reduce((acc, name) => {
+    return { ...acc, [name]: getTable(name) };
+  }, {});
+};
+
+export enum ConfigDefaultType {
+  Table = 'table',
+  Lambda = 'lambda',
+  Account = 'account',
+}
+
+export const getDefaultConfig = (configType: ConfigDefaultType, name: string): ConfigMetricAlarm | undefined => {
+  if (configType === ConfigDefaultType.Table) {
+    return configFile?.custom?.default?.table?.[name];
+  } else if (configType === ConfigDefaultType.Lambda) {
+    return configFile?.custom?.default?.lambda?.[name];
+  } else if (configType === ConfigDefaultType.Account) {
+    return configFile?.custom?.default?.lambda?.[name];
+  }
+  return undefined;
+};
+
+export const isEnabled = (configType: ConfigDefaultType, name: string, localConfig?: ConfigMetricAlarm): boolean => {
+  return getDefaultConfig(configType, name)?.enabled === true || localConfig?.enabled === true;
 };

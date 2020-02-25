@@ -138,32 +138,29 @@ export interface MetricOptions {
   readonly color?: string;
 }
 
-export interface ConfigAlarms {
-  [key: string]: AlarmOptions;
+export interface ConfigMetricAlarm {
+  enabled?: boolean;
+  alarm?: AlarmOptions;
+  metric?: MetricOptions;
 }
 
-export interface ConfigMetrics {
-  [key: string]: MetricOptions;
+export interface ConfigMetricAlarms {
+  [key: string]: ConfigMetricAlarm;
 }
 
 export interface ConfigLocal {
   arn: string;
-  alarm: ConfigAlarms;
-  metric: ConfigMetrics;
+  config?: ConfigMetricAlarms;
 }
 
 export interface ConfigLocals {
   [key: string]: ConfigLocal;
 }
 
-export interface ConfigCustomDefaultTable {
-  alarm: ConfigAlarms;
-  metric: ConfigMetrics;
-}
-
 export interface ConfigCustomDefaults {
-  lambda: ConfigAlarms;
-  table: ConfigCustomDefaultTable;
+  lambda?: ConfigMetricAlarms;
+  table?: ConfigMetricAlarms;
+  account?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {

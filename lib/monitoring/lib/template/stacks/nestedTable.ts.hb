@@ -28,37 +28,45 @@ export default class NestedTableAlarmsStack extends cfn.NestedStack {
       // Load table from existing arn
       // const table = dynamodb.Table.fromTableArn(this, name, l.arn);
 
+      // From https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/metrics-dimensions.html
+      this.setupTableAlarm(name, 'ConditionalCheckFailedRequests', tableConfig);
       this.setupTableAlarm(name, 'ConsumedReadCapasityUnits', tableConfig);
       this.setupTableAlarm(name, 'ConsumedWriteCapasityUnits', tableConfig);
+      this.setupTableAlarm(name, 'MaxProvisionedTableReadCapacityUtilization', tableConfig);
+      this.setupTableAlarm(name, 'MaxProvisionedTableWriteCapacityUtilization', tableConfig);
+      this.setupTableAlarm(name, 'OnlineIndexConsumedWriteCapacity', tableConfig);
+      this.setupTableAlarm(name, 'OnlineIndexPercentageProgress', tableConfig);
+      this.setupTableAlarm(name, 'OnlineIndexThrottleEvents', tableConfig);
+      this.setupTableAlarm(name, 'PendingReplicationCount', tableConfig);
       this.setupTableAlarm(name, 'ProvisionedReadCapasity', tableConfig);
       this.setupTableAlarm(name, 'ProvisionedWriteCapasity', tableConfig);
+      this.setupTableAlarm(name, 'ReadThrottleEvents', tableConfig);
+      this.setupTableAlarm(name, 'ReplicationLatency', tableConfig);
+      this.setupTableAlarm(name, 'ReturnedBytes', tableConfig);
+      this.setupTableAlarm(name, 'ReturnedItemCount', tableConfig);
+      this.setupTableAlarm(name, 'ReturnedRecordsCount', tableConfig);
+      this.setupTableAlarm(name, 'SystemErrors', tableConfig);
+      this.setupTableAlarm(name, 'TimeToLiveDeletedItemCount', tableConfig);
+      this.setupTableAlarm(name, 'ThrottledRequests', tableConfig);
+      this.setupTableAlarm(name, 'TransactionConflict', tableConfig);
+      this.setupTableAlarm(name, 'WriteThrottleEvents', tableConfig);
     });
   }
 
-  // Add actions for alarm
-  addAlarmActions(alarm: cw.Alarm): void {
-    alarm.addAlarmAction(this.snsStack.topicAction);
-    alarm.addOkAction(this.snsStack.topicAction);
-  }
-
-  setupAccountAlarm(metricName: string, tableName: string, conf?: config.ConfigLocal): void {
-    const metric = new cw.Metric({ ...getMetricConfig(metricName, conf?.metric), dimensions: [] });
-    const alarmConfig = getAlarmConfig('table', metricName, conf?.alarm);
-    const alarm = metric.createAlarm(this, `${tableName}-${metricName}`, alarmConfig);
-
-    this.addAlarmActions(alarm);
-  }
-
   setupTableAlarm(metricName: string, tableName: string, conf?: config.ConfigLocal): void {
+    if (!config.isEnabled(config.ConfigDefaultType.Table, metricName, conf?.config)) {
+      return;
+    }
+
     const metric = new cw.Metric({
-      ...getMetricConfig(metricName, conf?.metric),
+      ...getMetricConfig(config.ConfigDefaultType.Table, metricName, conf?.config?.metric),
       dimensions: {
         TableName: tableName,
       },
     });
 
-    const alarmConfig = getAlarmConfig('table', metricName, conf?.alarm);
+    const alarmConfig = getAlarmConfig(config.ConfigDefaultType.Table, metricName, conf?.config?.alarm);
     const alarm = metric.createAlarm(this, `${tableName}-${metricName}`, alarmConfig);
-    this.addAlarmActions(alarm);
+    this.snsStack.addAlarmActions(alarm);
   }
 }

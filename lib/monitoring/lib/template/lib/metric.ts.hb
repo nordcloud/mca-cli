@@ -96,12 +96,14 @@ function getDuration(conf?: config.MetricDuration): cdk.Duration {
   return defaultDuration;
 }
 
-export const getMetricConfig = (metricName: string, conf?: config.ConfigMetrics): cw.MetricProps => {
-  const defaultConfig = config.configFile?.custom?.default?.table?.metric?.[metricName];
-
+export const getMetricConfig = (
+  configType: config.ConfigDefaultType,
+  metricName: string,
+  conf?: config.ConfigMetricAlarm,
+): cw.MetricProps => {
   const combined = {
-    ...(defaultConfig || {}),
-    ...(conf?.[metricName] || {}),
+    ...(config.getDefaultConfig(configType, metricName)?.metric || {}),
+    ...(conf?.metric || {}),
   };
 
   const obj: cw.MetricProps = {

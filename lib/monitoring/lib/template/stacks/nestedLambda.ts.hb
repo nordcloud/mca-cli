@@ -39,14 +39,16 @@ export default class NestedLambdaAlarmsStack extends cfn.NestedStack {
     });
   }
 
-  // Add actions for alarm
-  addAlarmActions(alarm: cw.Alarm): void {
-    alarm.addAlarmAction(this.snsStack.topicAction);
-    alarm.addOkAction(this.snsStack.topicAction);
-  }
+  private setupLambdaAlarm(name: string, type: string, metric: cw.Metric, conf?: config.ConfigLocal): void {
+    if (!config.isEnabled(config.ConfigDefaultType.Lambda, name, conf?.config)) {
+      return;
+    }
 
-  setupLambdaAlarm(name: string, type: string, metric: cw.Metric, conf?: config.ConfigLocal): void {
-    const alarm = metric.createAlarm(this, `${name}-${type}`, getAlarmConfig('lambda', type, conf?.alarm));
-    this.addAlarmActions(alarm);
+    const alarm = metric.createAlarm(
+      this,
+      `${name}-${type}`,
+      getAlarmConfig(config.ConfigDefaultType.Lambda, type, conf?.config?.alarm),
+    );
+    this.snsStack.addAlarmActions(alarm);
   }
 }

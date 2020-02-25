@@ -13,65 +13,111 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
       includes: args.include,
       excludes: args.exclude,
     },
-    lambdas: functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: { arn: f.FunctionArn } }), {}),
-    tables: tables.reduce((acc, t) => ({ ...acc, [t.TableName]: { arn: t.TableArn } }), {}),
+    lambdas: functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: { arn: f.FunctionArn, config: {} } }), {}),
+    tables: tables.reduce((acc, t) => ({ ...acc, [t.TableName]: { arn: t.TableArn, config: {} } }), {}),
     custom: {
       default: {
         lambda: {
           errors: {
-            threshold: 10,
-            evaluationPeriods: 5,
-          },
-          invocations: {
-            threshold: 200,
-            evaluationPeriods: 5,
-          },
-          duration: {
-            threshold: 2000,
-            evaluationPeriods: 5,
-          },
-          throttles: {
-            threshold: 10,
-            evaluationPeriods: 5,
-          },
-        },
-        table: {
-          alarm: {
-            ConsumedReadCapasityUnits: {
+            enabled: true,
+            alarm: {
               threshold: 10,
               evaluationPeriods: 5,
             },
-            ConsumedWriteCapasityUnits: {
+          },
+          invocations: {
+            enabled: true,
+            alarm: {
               threshold: 200,
               evaluationPeriods: 5,
             },
-            ProvisionedReadCapasity: {
+          },
+          duration: {
+            enabled: true,
+            alarm: {
               threshold: 2000,
               evaluationPeriods: 5,
             },
-            ProvisionedWriteCapasity: {
+          },
+          throttles: {
+            enabled: true,
+            alarm: {
               threshold: 10,
               evaluationPeriods: 5,
             },
           },
-          metric: {
-            ConsumedReadCapasityUnits: {
-              period: { minutes: 5 },
-              statistic: 'Maximum',
+        },
+        table: {
+          ConsumedReadCapasityUnits: {
+            enabled: true,
+            alarm: {
+              threshold: 10,
+              evaluationPeriods: 5,
             },
-            ConsumedWriteCapasityUnits: {
-              period: { minutes: 5 },
-              statistic: 'Maximum',
-            },
-            ProvisionedReadCapasity: {
-              period: { minutes: 5 },
-              statistic: 'Maximum',
-            },
-            ProvisionedWriteCapasity: {
+            metric: {
               period: { minutes: 5 },
               statistic: 'Maximum',
             },
           },
+          ConsumedWriteCapasityUnits: {
+            enabled: true,
+            alarm: {
+              threshold: 200,
+              evaluationPeriods: 5,
+            },
+            metric: {
+              period: { minutes: 5 },
+              statistic: 'Maximum',
+            },
+          },
+          ProvisionedReadCapasity: {
+            enabled: true,
+            alarm: {
+              threshold: 2000,
+              evaluationPeriods: 5,
+            },
+            metric: {
+              period: { minutes: 5 },
+              statistic: 'Maximum',
+            },
+          },
+          ProvisionedWriteCapasity: {
+            enabled: true,
+            alarm: {
+              threshold: 10,
+              evaluationPeriods: 5,
+            },
+            metric: {
+              period: { minutes: 5 },
+              statistic: 'Maximum',
+            },
+          },
+          ConditionalCheckFailedRequests: { enabled: false },
+          MaxProvisionedTableReadCapacityUtilization: { enabled: false },
+          MaxProvisionedTableWriteCapacityUtilization: { enabled: false },
+          OnlineIndexConsumedWriteCapacity: { enabled: false },
+          OnlineIndexPercentageProgress: { enabled: false },
+          OnlineIndexThrottleEvents: { enabled: false },
+          PendingReplicationCount: { enabled: false },
+          ReadThrottleEvents: { enabled: false },
+          ReplicationLatency: { enabled: false },
+          ReturnedBytes: { enabled: false },
+          ReturnedItemCount: { enabled: false },
+          ReturnedRecordsCount: { enabled: false },
+          SystemErrors: { enabled: false },
+          TimeToLiveDeletedItemCount: { enabled: false },
+          ThrottledRequests: { enabled: false },
+          TransactionConflict: { enabled: false },
+          WriteThrottleEvents: { enabled: false },
+        },
+        account: {
+          AccountMaxReads: { enabled: false },
+          AccountMaxTableLevelReads: { enabled: false },
+          AccountMaxTableLevelWrites: { enabled: false },
+          AccountMaxWrites: { enabled: false },
+          AccountProvisionedReadCapacityUtilization: { enabled: false },
+          AccountProvisionedWriteCapacityUtilization: { enabled: false },
+          UserErrors: { enabled: false },
         },
       },
       snsTopics: {

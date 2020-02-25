@@ -24,7 +24,12 @@ export const getTemplateFiles = async (folder: string): Promise<string[]> => {
   return files;
 };
 
-const generateTemplate = async (templatePath: string, templateFolder: string, args: Args, outputPath: string): Promise<void> => {
+const generateTemplate = async (
+  templatePath: string,
+  templateFolder: string,
+  args: Args,
+  outputPath: string,
+): Promise<void> => {
   // Read template file content
   const content = await fs.readFile(templatePath);
 
@@ -42,12 +47,22 @@ const generateTemplate = async (templatePath: string, templateFolder: string, ar
   await fs.writeFile(filePath, template(args));
 };
 
-const generateConfig = async (functions: FunctionItem[], tables: TableItem[], args: Args, outputPath: string): Promise<void> => {
+const generateConfig = async (
+  functions: FunctionItem[],
+  tables: TableItem[],
+  args: Args,
+  outputPath: string,
+): Promise<void> => {
   const filePath = path.join(outputPath, 'config.yml');
   return fs.writeFile(filePath, conf.dumpNewConfig(functions, tables, args));
 };
 
-export const logGenerateSuccess = (functions: FunctionItem[], tables: TableItem[], args: Args, outputPath: string): void => {
+export const logGenerateSuccess = (
+  functions: FunctionItem[],
+  tables: TableItem[],
+  args: Args,
+  outputPath: string,
+): void => {
   console.log('');
   console.log('Monitoring generated successfully to', outputPath);
   console.log('Lambdas:', functions.length);

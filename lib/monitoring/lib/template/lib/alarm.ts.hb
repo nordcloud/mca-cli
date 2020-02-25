@@ -1,6 +1,6 @@
 import * as cw from '@aws-cdk/aws-cloudwatch';
 
-import { configFile, ConfigAlarms, AlarmOptions } from './config';
+import * as config from './config';
 
 function getComparisonOperator(str?: string): cw.ComparisonOperator {
   if (!str) {
@@ -46,41 +46,28 @@ function getTreatMissingData(str?: string): cw.TreatMissingData {
   }
 }
 
-export const getAlarmConfig = (type: string, key: string, config?: ConfigAlarms): cw.CreateAlarmOptions => {
-  // Get default config
-  let defaultConfig: AlarmOptions;
-  if (type.toUpperCase() === 'TABLE') {
-    defaultConfig = configFile?.custom?.default?.table?.alarm?.[key];
-  } else if (type.toUpperCase() === 'LAMBDA') {
-    defaultConfig = configFile?.custom?.default?.lambda?.alarm?.[key];
-  } else {
-    throw new Error(`Invalid type for alarm config, ${type}`);
-  }
-
-  const combined = {
-    // Add config values
-    ...(defaultConfig || {}),
-    ...(config?.[key] || {}),
-  };
-
-  // Generate initial config
-  const conf: cw.CreateAlarmOptions = {
+export const getAlarmConfig = (
+  configType: config.ConfigDefaultType,
+  key: string,
+  conf?: config.ConfigMetricAlarm,
+): cw.CreateAlarmOptions => {
+  const combined: config.AlarmOptions = {
     // Add required default values
     threshold: 100,
     evaluationPeriods: 2,
 
+    // Add config values
+    ...(config.getDefaultConfig(configType, key)?.alarm || {}),
+    ...(conf?.alarm || {}),
+  };
+
+  // Generate initial config
+  return {
     ...combined,
-    treatMissingData: getTreatMissingData(combined.treatMissingData),
-    comparisonOperator: getComparisonOperator(combined.comparisonOperator),
+    treatMissingData: getTreatMissingData(combined?.treatMissingData),
+    comparisonOperator: getComparisonOperator(combined?.comparisonOperator),
 
     // Make sure config doesn't override these
     actionsEnabled: true,
-  };
-
-  // Fix some configs from string to proper enum value
-  return {
-    ...conf,
-    treatMissingData: getTreatMissingData(conf.treatMissingData),
-    comparisonOperator: getComparisonOperator(conf.comparisonOperator),
   };
 };
