@@ -21,7 +21,7 @@ export default class NestedSNSStack extends cfn.NestedStack {
   }
 
   // Add actions for alarm
-  public addAlarmActions(alarm: cw.Alarm, autoResolve: boolean = true): void {
+  public addAlarmActions(alarm: cw.Alarm, autoResolve: boolean = false): void {
     alarm.addAlarmAction(this.topicAction);
     if (autoResolve) {
       alarm.addOkAction(this.topicAction);
