@@ -43,12 +43,13 @@ export default class NestedLambdaAlarmsStack extends cfn.NestedStack {
     if (!config.isEnabled(config.ConfigDefaultType.Lambda, name, conf?.config)) {
       return;
     }
+    const autoResolve = config.autoResolve(config.ConfigDefaultType.Lambda, name, conf?.config);
 
     const alarm = metric.createAlarm(
       this,
       `${name}-${type}`,
       getAlarmConfig(config.ConfigDefaultType.Lambda, type, conf?.config?.alarm),
     );
-    this.snsStack.addAlarmActions(alarm);
+    this.snsStack.addAlarmActions(alarm, autoResolve);
   }
 }

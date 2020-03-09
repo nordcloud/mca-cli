@@ -20,6 +20,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
         lambda: {
           errors: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,
@@ -27,6 +28,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           invocations: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 200,
               evaluationPeriods: 5,
@@ -34,6 +36,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           duration: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 2000,
               evaluationPeriods: 5,
@@ -41,6 +44,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           throttles: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,
@@ -50,6 +54,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
         table: {
           ConsumedReadCapasityUnits: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,
@@ -61,6 +66,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           ConsumedWriteCapasityUnits: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 200,
               evaluationPeriods: 5,
@@ -72,6 +78,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           ProvisionedReadCapasity: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 2000,
               evaluationPeriods: 5,
@@ -83,6 +90,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           ProvisionedWriteCapasity: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,

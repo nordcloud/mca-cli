@@ -57,6 +57,7 @@ export default class NestedTableAlarmsStack extends cfn.NestedStack {
     if (!config.isEnabled(config.ConfigDefaultType.Table, metricName, conf?.config)) {
       return;
     }
+    const autoResolve = config.autoResolve(config.ConfigDefaultType.Table, metricName, conf?.config);
 
     const metric = new cw.Metric({
       ...getMetricConfig(config.ConfigDefaultType.Table, metricName, conf?.config?.metric),
@@ -67,6 +68,6 @@ export default class NestedTableAlarmsStack extends cfn.NestedStack {
 
     const alarmConfig = getAlarmConfig(config.ConfigDefaultType.Table, metricName, conf?.config?.alarm);
     const alarm = metric.createAlarm(this, `${tableName}-${metricName}`, alarmConfig);
-    this.snsStack.addAlarmActions(alarm);
+    this.snsStack.addAlarmActions(alarm, autoResolve);
   }
 }

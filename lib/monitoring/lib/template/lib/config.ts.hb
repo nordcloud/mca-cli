@@ -208,3 +208,7 @@ export const getDefaultConfig = (configType: ConfigDefaultType, name: string): C
 export const isEnabled = (configType: ConfigDefaultType, name: string, localConfig?: ConfigMetricAlarm): boolean => {
   return getDefaultConfig(configType, name)?.enabled === true || localConfig?.enabled === true;
 };
+
+export const autoResolve = (configType: ConfigDefaultType, name: string, localConfig?: ConfigMetricAlarm): boolean => {
+  return getDefaultConfig(configType, name)?.autoResolve === true || localConfig?.autoResolve === true;
+};
