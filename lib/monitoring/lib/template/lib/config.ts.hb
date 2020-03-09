@@ -112,6 +112,7 @@ export interface MetricOptions {
 
 export interface ConfigMetricAlarm {
   enabled?: boolean;
+  autoResolve?: boolean;
   alarm?: AlarmOptions;
   metric?: MetricOptions;
 }
