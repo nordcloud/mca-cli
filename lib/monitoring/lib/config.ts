@@ -52,7 +52,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
         },
         table: {
-          ConsumedReadCapasityUnits: {
+          ConsumedReadCapacityUnits: {
             enabled: true,
             autoResolve: false,
             alarm: {
@@ -64,7 +64,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
               statistic: 'Maximum',
             },
           },
-          ConsumedWriteCapasityUnits: {
+          ConsumedWriteCapacityUnits: {
             enabled: true,
             autoResolve: false,
             alarm: {
@@ -76,7 +76,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
               statistic: 'Maximum',
             },
           },
-          ProvisionedReadCapasity: {
+          ProvisionedReadCapacity: {
             enabled: true,
             autoResolve: false,
             alarm: {
@@ -88,7 +88,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
               statistic: 'Maximum',
             },
           },
-          ProvisionedWriteCapasity: {
+          ProvisionedWriteCapacity: {
             enabled: true,
             autoResolve: false,
             alarm: {
