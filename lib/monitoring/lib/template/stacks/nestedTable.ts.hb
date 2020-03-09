@@ -30,16 +30,16 @@ export default class NestedTableAlarmsStack extends cfn.NestedStack {
 
       // From https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/metrics-dimensions.html
       this.setupTableAlarm(name, 'ConditionalCheckFailedRequests', tableConfig);
-      this.setupTableAlarm(name, 'ConsumedReadCapasityUnits', tableConfig);
-      this.setupTableAlarm(name, 'ConsumedWriteCapasityUnits', tableConfig);
+      this.setupTableAlarm(name, 'ConsumedReadCapacityUnits', tableConfig);
+      this.setupTableAlarm(name, 'ConsumedWriteCapacityUnits', tableConfig);
       this.setupTableAlarm(name, 'MaxProvisionedTableReadCapacityUtilization', tableConfig);
       this.setupTableAlarm(name, 'MaxProvisionedTableWriteCapacityUtilization', tableConfig);
       this.setupTableAlarm(name, 'OnlineIndexConsumedWriteCapacity', tableConfig);
       this.setupTableAlarm(name, 'OnlineIndexPercentageProgress', tableConfig);
       this.setupTableAlarm(name, 'OnlineIndexThrottleEvents', tableConfig);
       this.setupTableAlarm(name, 'PendingReplicationCount', tableConfig);
-      this.setupTableAlarm(name, 'ProvisionedReadCapasity', tableConfig);
-      this.setupTableAlarm(name, 'ProvisionedWriteCapasity', tableConfig);
+      this.setupTableAlarm(name, 'ProvisionedReadCapacity', tableConfig);
+      this.setupTableAlarm(name, 'ProvisionedWriteCapacity', tableConfig);
       this.setupTableAlarm(name, 'ReadThrottleEvents', tableConfig);
       this.setupTableAlarm(name, 'ReplicationLatency', tableConfig);
       this.setupTableAlarm(name, 'ReturnedBytes', tableConfig);
@@ -57,6 +57,7 @@ export default class NestedTableAlarmsStack extends cfn.NestedStack {
     if (!config.isEnabled(config.ConfigDefaultType.Table, metricName, conf?.config)) {
       return;
     }
+    const autoResolve = config.autoResolve(config.ConfigDefaultType.Table, metricName, conf?.config);
 
     const metric = new cw.Metric({
       ...getMetricConfig(config.ConfigDefaultType.Table, metricName, conf?.config?.metric),
@@ -67,6 +68,6 @@ export default class NestedTableAlarmsStack extends cfn.NestedStack {
 
     const alarmConfig = getAlarmConfig(config.ConfigDefaultType.Table, metricName, conf?.config?.alarm);
     const alarm = metric.createAlarm(this, `${tableName}-${metricName}`, alarmConfig);
-    this.snsStack.addAlarmActions(alarm);
+    this.snsStack.addAlarmActions(alarm, autoResolve);
   }
 }

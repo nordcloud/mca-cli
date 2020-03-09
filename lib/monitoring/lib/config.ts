@@ -20,6 +20,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
         lambda: {
           errors: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,
@@ -27,6 +28,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           invocations: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 200,
               evaluationPeriods: 5,
@@ -34,6 +36,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           duration: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 2000,
               evaluationPeriods: 5,
@@ -41,6 +44,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
           throttles: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,
@@ -48,8 +52,9 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           },
         },
         table: {
-          ConsumedReadCapasityUnits: {
+          ConsumedReadCapacityUnits: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,
@@ -59,8 +64,9 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
               statistic: 'Maximum',
             },
           },
-          ConsumedWriteCapasityUnits: {
+          ConsumedWriteCapacityUnits: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 200,
               evaluationPeriods: 5,
@@ -70,8 +76,9 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
               statistic: 'Maximum',
             },
           },
-          ProvisionedReadCapasity: {
+          ProvisionedReadCapacity: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 2000,
               evaluationPeriods: 5,
@@ -81,8 +88,9 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
               statistic: 'Maximum',
             },
           },
-          ProvisionedWriteCapasity: {
+          ProvisionedWriteCapacity: {
             enabled: true,
+            autoResolve: false,
             alarm: {
               threshold: 10,
               evaluationPeriods: 5,
