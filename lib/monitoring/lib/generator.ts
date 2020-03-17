@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as hb from 'handlebars';
 
 import * as fs from './fsUtil';
-import { TableItem, FunctionItem, Args, ClusterItem, AWSItem } from './types';
+import { Args, AWSItem } from './types';
 import * as conf from './config';
 
 export const generatePath = (profile: string): string => {
@@ -47,11 +47,7 @@ const generateTemplate = async (
   await fs.writeFile(filePath, template(args));
 };
 
-const generateConfig = async (
-  aws: AWSItem,
-  args: Args,
-  outputPath: string,
-): Promise<void> => {
+const generateConfig = async (aws: AWSItem, args: Args, outputPath: string): Promise<void> => {
   const filePath = path.join(outputPath, 'config.yml');
   return fs.writeFile(filePath, conf.dumpNewConfig(aws, args));
 };

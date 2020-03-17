@@ -33,10 +33,14 @@ const exec = (exe: string, args: string[]): Promise<{ stdout: string; stderr: st
   });
 };
 
-export const getFunctions = async (profile: string, include: string[], exclude: string[]): Promise<types.FunctionItem[]> => {
+export const getFunctions = async (
+  profile: string,
+  include: string[],
+  exclude: string[],
+): Promise<types.FunctionItem[]> => {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'lambda', 'list-functions']);
   if (stderr !== '') {
-    console.log(stderr)
+    console.log(stderr);
   }
   if (stdout === '') {
     return [];
@@ -48,7 +52,7 @@ export const getFunctions = async (profile: string, include: string[], exclude: 
 export const getTables = async (profile: string, include: string[], exclude: string[]): Promise<types.TableItem[]> => {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'dynamodb', 'list-tables']);
   if (stderr !== '') {
-    console.log(stderr)
+    console.log(stderr);
   }
   if (stdout === '') {
     return [];
@@ -73,10 +77,14 @@ export const getTables = async (profile: string, include: string[], exclude: str
   return tables.filter(t => match(t.TableName, include, exclude));
 };
 
-export const getClusters = async (profile: string, include: string[], exclude: string[]): Promise<types.ClusterItem[]> => {
+export const getClusters = async (
+  profile: string,
+  include: string[],
+  exclude: string[],
+): Promise<types.ClusterItem[]> => {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'ecs', 'list-clusters']);
   if (stderr !== '') {
-    console.log(stderr)
+    console.log(stderr);
   }
   if (stdout === '') {
     return [];
@@ -94,7 +102,7 @@ export const getClusters = async (profile: string, include: string[], exclude: s
         arn,
       ]);
       if (stderr !== '') {
-        console.log(stderr)
+        console.log(stderr);
       }
       if (stdout === '') {
         return [];
@@ -104,9 +112,7 @@ export const getClusters = async (profile: string, include: string[], exclude: s
     }),
   );
 
-  return clusters
-    .reduce((acc, c) => [ ...acc, ...c ], [])
-    .filter(t => t && match(t.clusterName, include, exclude));
+  return clusters.reduce((acc, c) => [...acc, ...c], []).filter(t => t && match(t.clusterName, include, exclude));
 };
 
 export const getAllFromAWS = async (args: types.Args): Promise<types.AWSItem> => {
@@ -119,5 +125,5 @@ export const getAllFromAWS = async (args: types.Args): Promise<types.AWSItem> =>
     functions,
     tables,
     clusters,
-  }
-}
+  };
+};

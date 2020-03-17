@@ -4,7 +4,7 @@ import * as yaml from 'js-yaml';
 import { Args, Config, AWSItem } from './types';
 import diff from './diff';
 
-function addLambdas(aws: AWSItem, config: Config) {
+function addLambdas(aws: AWSItem, config: Config): Config {
   if (aws.functions.length === 0) {
     return config;
   }
@@ -42,7 +42,7 @@ function addLambdas(aws: AWSItem, config: Config) {
         evaluationPeriods: 5,
       },
     },
-  }
+  };
 
   return {
     ...config,
@@ -51,13 +51,13 @@ function addLambdas(aws: AWSItem, config: Config) {
       ...config.custom,
       default: {
         ...config.custom.default,
-        lambda: defaultConfig
-      }
-    }
-  }
+        lambda: defaultConfig,
+      },
+    },
+  };
 }
 
-function addTables(aws: AWSItem, config: Config) {
+function addTables(aws: AWSItem, config: Config): Config {
   if (aws.tables.length === 0) {
     return config;
   }
@@ -128,7 +128,7 @@ function addTables(aws: AWSItem, config: Config) {
     ThrottledRequests: { enabled: false },
     TransactionConflict: { enabled: false },
     WriteThrottleEvents: { enabled: false },
-  }
+  };
 
   return {
     ...config,
@@ -137,13 +137,13 @@ function addTables(aws: AWSItem, config: Config) {
       ...config.custom,
       default: {
         ...config.custom.default,
-        table: defaultConfig
-      }
-    }
-  }
+        table: defaultConfig,
+      },
+    },
+  };
 }
 
-function addClusters(aws: AWSItem, config: Config) {
+function addClusters(aws: AWSItem, config: Config): Config {
   if (aws.clusters.length === 0) {
     return config;
   }
@@ -174,7 +174,7 @@ function addClusters(aws: AWSItem, config: Config) {
     CPUReservation: { enabled: false },
     MemoryReservation: { enabled: false },
     GPUReservation: { enabled: false },
-  }
+  };
 
   return {
     ...config,
@@ -183,10 +183,10 @@ function addClusters(aws: AWSItem, config: Config) {
       ...config.custom,
       default: {
         ...config.custom.default,
-        cluster: defaultConfig
-      }
-    }
-  }
+        cluster: defaultConfig,
+      },
+    },
+  };
 }
 
 export const createConfig = (aws: AWSItem, args: Args): Config => {
@@ -249,10 +249,10 @@ export const combineConfig = (configOld: Config, configNew: Config): Config => {
     );
   } else {
     if (configOld?.lambdas) {
-      delete configOld.lambdas
+      delete configOld.lambdas;
     }
     if (configOld?.custom?.default?.lambda) {
-      delete configOld.custom.default.lambda
+      delete configOld.custom.default.lambda;
     }
   }
 
@@ -269,10 +269,10 @@ export const combineConfig = (configOld: Config, configNew: Config): Config => {
     );
   } else {
     if (configOld?.tables) {
-      delete configOld.tables
+      delete configOld.tables;
     }
     if (configOld?.custom?.default?.table) {
-      delete configOld.custom.default.table
+      delete configOld.custom.default.table;
     }
   }
 
