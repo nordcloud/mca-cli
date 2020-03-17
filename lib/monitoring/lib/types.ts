@@ -8,6 +8,22 @@ export interface TableItem {
   TableArn: string;
 }
 
+export interface ClusterItem {
+  status: string;
+  clusterName: string;
+  registeredContainerInstancesCount: number;
+  pendingTasksCount: number;
+  runningTasksCount: number;
+  activeServicesCount: number;
+  clusterArn: string;
+}
+
+export interface AWSItem {
+  functions: FunctionItem[];
+  tables: TableItem[];
+  clusters: ClusterItem[];
+}
+
 export interface ListFunctionResponse {
   Functions: FunctionItem[];
 }
@@ -20,6 +36,14 @@ export interface DescribeTableResponse {
   Table: TableItem;
 }
 
+export interface ListClusterResponse {
+  clusterArns: string[];
+}
+
+export interface DescribeClusterResponse {
+  clusters: ClusterItem[];
+}
+
 export interface Args {
   config: string;
   profile: string;
@@ -30,6 +54,9 @@ export interface Args {
   dry: boolean;
 }
 
+/**
+ * CLI config in the config file
+ */
 export interface ConfigCLI {
   version: number;
   profile: string;
@@ -79,6 +106,9 @@ export interface AlarmOptions {
 
 export type DimensionHash = { [dim: string]: object };
 
+/**
+ * Duration values
+ */
 export interface MetricDuration {
   milliseconds?: number;
   seconds?: number;
@@ -162,6 +192,8 @@ export interface ConfigCustomDefaults {
   lambda?: ConfigMetricAlarms;
   table?: ConfigMetricAlarms;
   account?: ConfigMetricAlarms;
+  cluster?: ConfigMetricAlarms;
+  apiGateway?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {
@@ -173,12 +205,14 @@ export interface ConfigCustomSNS {
 
 export interface ConfigCustom {
   default: ConfigCustomDefaults;
-  snsTopics: ConfigCustomSNS;
+  snsTopic: ConfigCustomSNS;
 }
 
 export interface Config {
   cli: ConfigCLI;
-  lambdas: ConfigLocals;
-  tables: ConfigLocals;
+  lambdas?: ConfigLocals;
+  tables?: ConfigLocals;
+  clusters?: ConfigLocals;
+  routes?: ConfigLocals;
   custom: ConfigCustom;
 }

@@ -1,11 +1,196 @@
 import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
 
-import { TableItem, FunctionItem, Args, Config } from './types';
+import { Args, Config, AWSItem } from './types';
 import diff from './diff';
 
-export const createConfig = (functions: FunctionItem[], tables: TableItem[], args: Args): Config => {
+function addLambdas(aws: AWSItem, config: Config) {
+  if (aws.functions.length === 0) {
+    return config;
+  }
+
+  const defaultConfig = {
+    errors: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 10,
+        evaluationPeriods: 5,
+      },
+    },
+    invocations: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 200,
+        evaluationPeriods: 5,
+      },
+    },
+    duration: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 2000,
+        evaluationPeriods: 5,
+      },
+    },
+    throttles: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 10,
+        evaluationPeriods: 5,
+      },
+    },
+  }
+
   return {
+    ...config,
+    lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: { arn: f.FunctionArn } }), {}),
+    custom: {
+      ...config.custom,
+      default: {
+        ...config.custom.default,
+        lambda: defaultConfig
+      }
+    }
+  }
+}
+
+function addTables(aws: AWSItem, config: Config) {
+  if (aws.tables.length === 0) {
+    return config;
+  }
+
+  const defaultConfig = {
+    ConsumedReadCapacityUnits: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 10,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        statistic: 'Maximum',
+      },
+    },
+    ConsumedWriteCapacityUnits: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 200,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        statistic: 'Maximum',
+      },
+    },
+    ProvisionedReadCapacity: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 2000,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        statistic: 'Maximum',
+      },
+    },
+    ProvisionedWriteCapacity: {
+      enabled: true,
+      autoResolve: false,
+      alarm: {
+        threshold: 10,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        statistic: 'Maximum',
+      },
+    },
+    ConditionalCheckFailedRequests: { enabled: false },
+    MaxProvisionedTableReadCapacityUtilization: { enabled: false },
+    MaxProvisionedTableWriteCapacityUtilization: { enabled: false },
+    OnlineIndexConsumedWriteCapacity: { enabled: false },
+    OnlineIndexPercentageProgress: { enabled: false },
+    OnlineIndexThrottleEvents: { enabled: false },
+    PendingReplicationCount: { enabled: false },
+    ReadThrottleEvents: { enabled: false },
+    ReplicationLatency: { enabled: false },
+    ReturnedBytes: { enabled: false },
+    ReturnedItemCount: { enabled: false },
+    ReturnedRecordsCount: { enabled: false },
+    SystemErrors: { enabled: false },
+    TimeToLiveDeletedItemCount: { enabled: false },
+    ThrottledRequests: { enabled: false },
+    TransactionConflict: { enabled: false },
+    WriteThrottleEvents: { enabled: false },
+  }
+
+  return {
+    ...config,
+    tables: aws.tables.reduce((acc, t) => ({ ...acc, [t.TableName]: { arn: t.TableArn } }), {}),
+    custom: {
+      ...config.custom,
+      default: {
+        ...config.custom.default,
+        table: defaultConfig
+      }
+    }
+  }
+}
+
+function addClusters(aws: AWSItem, config: Config) {
+  if (aws.clusters.length === 0) {
+    return config;
+  }
+
+  const defaultConfig = {
+    CPUUtilization: {
+      enabled: true,
+      alarm: {
+        threshold: 90,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        unit: 'PERCENT',
+      },
+    },
+    MemoryUtilization: {
+      enabled: true,
+      alarm: {
+        threshold: 90,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        unit: 'PERCENT',
+      },
+    },
+    CPUReservation: { enabled: false },
+    MemoryReservation: { enabled: false },
+    GPUReservation: { enabled: false },
+  }
+
+  return {
+    ...config,
+    clusters: aws.clusters.reduce((acc, c) => ({ ...acc, [c.clusterName]: { arn: c.clusterArn } }), {}),
+    custom: {
+      ...config.custom,
+      default: {
+        ...config.custom.default,
+        cluster: defaultConfig
+      }
+    }
+  }
+}
+
+export const createConfig = (aws: AWSItem, args: Args): Config => {
+  let conf: Config = {
     cli: {
       version: 1,
       profile: args.profile,
@@ -13,111 +198,8 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
       includes: args.include,
       excludes: args.exclude,
     },
-    lambdas: functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: { arn: f.FunctionArn, config: {} } }), {}),
-    tables: tables.reduce((acc, t) => ({ ...acc, [t.TableName]: { arn: t.TableArn, config: {} } }), {}),
     custom: {
       default: {
-        lambda: {
-          errors: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 10,
-              evaluationPeriods: 5,
-            },
-          },
-          invocations: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 200,
-              evaluationPeriods: 5,
-            },
-          },
-          duration: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 2000,
-              evaluationPeriods: 5,
-            },
-          },
-          throttles: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 10,
-              evaluationPeriods: 5,
-            },
-          },
-        },
-        table: {
-          ConsumedReadCapacityUnits: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 10,
-              evaluationPeriods: 5,
-            },
-            metric: {
-              period: { minutes: 5 },
-              statistic: 'Maximum',
-            },
-          },
-          ConsumedWriteCapacityUnits: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 200,
-              evaluationPeriods: 5,
-            },
-            metric: {
-              period: { minutes: 5 },
-              statistic: 'Maximum',
-            },
-          },
-          ProvisionedReadCapacity: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 2000,
-              evaluationPeriods: 5,
-            },
-            metric: {
-              period: { minutes: 5 },
-              statistic: 'Maximum',
-            },
-          },
-          ProvisionedWriteCapacity: {
-            enabled: true,
-            autoResolve: false,
-            alarm: {
-              threshold: 10,
-              evaluationPeriods: 5,
-            },
-            metric: {
-              period: { minutes: 5 },
-              statistic: 'Maximum',
-            },
-          },
-          ConditionalCheckFailedRequests: { enabled: false },
-          MaxProvisionedTableReadCapacityUtilization: { enabled: false },
-          MaxProvisionedTableWriteCapacityUtilization: { enabled: false },
-          OnlineIndexConsumedWriteCapacity: { enabled: false },
-          OnlineIndexPercentageProgress: { enabled: false },
-          OnlineIndexThrottleEvents: { enabled: false },
-          PendingReplicationCount: { enabled: false },
-          ReadThrottleEvents: { enabled: false },
-          ReplicationLatency: { enabled: false },
-          ReturnedBytes: { enabled: false },
-          ReturnedItemCount: { enabled: false },
-          ReturnedRecordsCount: { enabled: false },
-          SystemErrors: { enabled: false },
-          TimeToLiveDeletedItemCount: { enabled: false },
-          ThrottledRequests: { enabled: false },
-          TransactionConflict: { enabled: false },
-          WriteThrottleEvents: { enabled: false },
-        },
         account: {
           AccountMaxReads: { enabled: false },
           AccountMaxTableLevelReads: { enabled: false },
@@ -128,7 +210,7 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
           UserErrors: { enabled: false },
         },
       },
-      snsTopics: {
+      snsTopic: {
         name: 'Topic for mca monitoring alarms',
         id: `${args.profile}-alarts-alarm`,
         endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
@@ -136,10 +218,15 @@ export const createConfig = (functions: FunctionItem[], tables: TableItem[], arg
       },
     },
   };
+
+  conf = addLambdas(aws, conf);
+  conf = addTables(aws, conf);
+  conf = addClusters(aws, conf);
+  return conf;
 };
 
-export const dumpNewConfig = (functions: FunctionItem[], tables: TableItem[], args: Args): string => {
-  return yaml.dump(createConfig(functions, tables, args));
+export const dumpNewConfig = (aws: AWSItem, args: Args): string => {
+  return yaml.dump(createConfig(aws, args));
 };
 
 export const loadConfig = async (configPath: string): Promise<Config> => {
@@ -149,27 +236,45 @@ export const loadConfig = async (configPath: string): Promise<Config> => {
 };
 
 export const combineConfig = (configOld: Config, configNew: Config): Config => {
-  configOld.lambdas = Object.keys(configNew.lambdas).reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: {
-        ...(configOld?.lambdas ? configOld.lambdas[key] || {} : {}),
-        ...(configNew?.lambdas ? configNew.lambdas[key] || {} : {}),
-      },
-    }),
-    {},
-  );
+  if (configNew?.lambdas) {
+    configOld.lambdas = Object.keys(configNew?.lambdas || []).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: {
+          ...(configOld?.lambdas ? configOld.lambdas[key] || {} : {}),
+          ...(configNew?.lambdas ? configNew.lambdas[key] || {} : {}),
+        },
+      }),
+      {},
+    );
+  } else {
+    if (configOld?.lambdas) {
+      delete configOld.lambdas
+    }
+    if (configOld?.custom?.default?.lambda) {
+      delete configOld.custom.default.lambda
+    }
+  }
 
-  configOld.tables = Object.keys(configNew.tables).reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: {
-        ...(configOld?.tables ? configOld.tables[key] || {} : {}),
-        ...(configNew?.tables ? configNew.tables[key] || {} : {}),
-      },
-    }),
-    {},
-  );
+  if (configNew?.tables) {
+    configOld.tables = Object.keys(configNew?.tables || []).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: {
+          ...(configOld?.tables ? configOld.tables[key] || {} : {}),
+          ...(configNew?.tables ? configNew.tables[key] || {} : {}),
+        },
+      }),
+      {},
+    );
+  } else {
+    if (configOld?.tables) {
+      delete configOld.tables
+    }
+    if (configOld?.custom?.default?.table) {
+      delete configOld.custom.default.table
+    }
+  }
 
   return configOld;
 };
