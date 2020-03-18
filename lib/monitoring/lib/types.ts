@@ -30,11 +30,26 @@ export interface RouteItem {
   endpointConfiguration: RouteItemEndpoint;
 }
 
+export interface DistributionAliases {
+  Quantatity: number;
+  Items: string[];
+}
+export interface DistributionItem {
+  Id: string;
+  ARN: string;
+  Status: string;
+  LastModifiedTime: string;
+  InProgressInvalidationBatches: number;
+  DomainName: string;
+  Aliases: DistributionAliases;
+}
+
 export interface AWSItem {
   functions: FunctionItem[];
   tables: TableItem[];
   clusters: ClusterItem[];
   routes: RouteItem[];
+  distributions: DistributionItem[];
 }
 
 export interface ListFunctionResponse {
@@ -59,6 +74,14 @@ export interface DescribeClusterResponse {
 
 export interface ListRouteResponse {
   items: RouteItem[];
+}
+
+export interface DistributionList {
+  Quantity: number;
+  Items: DistributionItem[];
+}
+export interface ListDistributionResponse {
+  DistributionList: DistributionList;
 }
 
 export interface Args {
@@ -211,6 +234,7 @@ export interface ConfigCustomDefaults {
   account?: ConfigMetricAlarms;
   cluster?: ConfigMetricAlarms;
   apiGateway?: ConfigMetricAlarms;
+  cloudfront?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {
@@ -231,5 +255,6 @@ export interface Config {
   tables?: ConfigLocals;
   clusters?: ConfigLocals;
   routes?: ConfigLocals;
+  distributions?: ConfigLocals;
   custom: ConfigCustom;
 }

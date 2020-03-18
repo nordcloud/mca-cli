@@ -1,6 +1,6 @@
-import { TableItem, FunctionItem, ClusterItem, RouteItem, AWSItem } from './types';
+import { AWSItem } from './types';
 
-function listFunctions(functions: FunctionItem[]): void {
+function listFunctions({ functions }: AWSItem): void {
   if (functions.length === 0) {
     return;
   }
@@ -14,7 +14,7 @@ function listFunctions(functions: FunctionItem[]): void {
   console.log('');
 }
 
-function listTables(tables: TableItem[]): void {
+function listTables({ tables }: AWSItem): void {
   if (tables.length === 0) {
     return;
   }
@@ -28,7 +28,7 @@ function listTables(tables: TableItem[]): void {
   console.log('');
 }
 
-function listClusters(clusters: ClusterItem[]): void {
+function listClusters({ clusters }: AWSItem): void {
   if (clusters.length === 0) {
     return;
   }
@@ -42,7 +42,7 @@ function listClusters(clusters: ClusterItem[]): void {
   console.log('');
 }
 
-function listRoutes(routes: RouteItem[]): void {
+function listRoutes({ routes }: AWSItem): void {
   if (routes.length === 0) {
     return;
   }
@@ -55,12 +55,33 @@ function listRoutes(routes: RouteItem[]): void {
   console.log('');
 }
 
+function listDistributions({ distributions }: AWSItem): void {
+  if (distributions.length === 0) {
+    return;
+  }
+
+  console.log('');
+  console.log('Cloudfront ditributions:');
+  distributions.forEach(d => {
+    console.log('  - name:', d.Id);
+    console.log('    arn:', d.ARN);
+    if (d.Aliases.Items.length !== 0) {
+      console.log('    aliases:');
+      d.Aliases.Items.forEach(a => {
+        console.log('      -', a);
+      });
+    }
+  });
+  console.log('');
+}
+
 /**
  * Log all AWS items
  */
 export function logAWS(aws: AWSItem): void {
-  listFunctions(aws.functions);
-  listTables(aws.tables);
-  listClusters(aws.clusters);
-  listRoutes(aws.routes);
+  listFunctions(aws);
+  listTables(aws);
+  listClusters(aws);
+  listRoutes(aws);
+  listDistributions(aws);
 }

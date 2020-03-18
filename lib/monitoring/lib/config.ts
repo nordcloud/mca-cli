@@ -249,6 +249,63 @@ function addRoutes(aws: AWSItem, config: Config): Config {
   };
 }
 
+function addDistributions({ distributions }: AWSItem, config: Config): Config {
+  if (distributions.length === 0) {
+    return config;
+  }
+
+  const defaultConfig = {
+    '4XXErrorRate': {
+      enabled: true,
+      alarm: {
+        threshold: 5,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        unit: 'PERCENT',
+        statistic: 'Average',
+      },
+    },
+    '5XXErrorRate': {
+      enabled: true,
+      alarm: {
+        threshold: 1,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        unit: 'PERCENT',
+        statistic: 'Average',
+      },
+    },
+    '401ErrorRate': { enabled: false },
+    '403ErrorRate': { enabled: false },
+    '404ErrorRate': { enabled: false },
+    '502ErrorRate': { enabled: false },
+    '503ErrorRate': { enabled: false },
+    '504ErrorRate': { enabled: false },
+    BytesDownloaded: { enabled: false },
+    BytesUploaded: { enabled: false },
+    CacheHitRate: { enabled: false },
+    OriginLatency: { enabled: false },
+    Requests: { enabled: false },
+    TotalErrorRate: { enabled: false },
+  };
+
+  return {
+    ...config,
+    distributions: distributions.reduce((acc, d) => ({ ...acc, [d.Id]: { arn: d.ARN } }), {}),
+    custom: {
+      ...config.custom,
+      default: {
+        ...config.custom.default,
+        cloudfront: defaultConfig,
+      },
+    },
+  };
+}
+
 export function createConfig(aws: AWSItem, args: Args): Config {
   let conf: Config = {
     cli: {
@@ -283,6 +340,7 @@ export function createConfig(aws: AWSItem, args: Args): Config {
   conf = addTables(aws, conf);
   conf = addClusters(aws, conf);
   conf = addRoutes(aws, conf);
+  conf = addDistributions(aws, conf);
   return conf;
 }
 

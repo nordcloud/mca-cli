@@ -122,17 +122,40 @@ export async function getRoutes(profile: string, include: string[], exclude: str
   return items.filter(r => match(r.name, include, exclude));
 }
 
+export async function getDistributions(
+  profile: string,
+  include: string[],
+  exclude: string[],
+): Promise<types.DistributionItem[]> {
+  const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'cloudfront', 'list-distributions']);
+  if (stderr !== '') {
+    console.log(stderr);
+  }
+  if (stdout === '') {
+    return [];
+  }
+  const { DistributionList }: types.ListDistributionResponse = JSON.parse(stdout);
+
+  // Check if any alias match for distribution ID
+  return DistributionList.Items.filter(d => {
+    const aliases = d.Aliases.Items.filter(a => match(a, include, exclude));
+    return match(d.Id, include, exclude) || aliases.length !== 0;
+  });
+}
+
 export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
   const { profile, service, include, exclude } = args;
   const functions = service.indexOf('lambda') !== -1 ? await getFunctions(profile, include, exclude) : [];
   const tables = service.indexOf('dynamodb') !== -1 ? await getTables(profile, include, exclude) : [];
   const clusters = service.indexOf('ecs') !== -1 ? await getClusters(profile, include, exclude) : [];
   const routes = service.indexOf('apigateway') !== -1 ? await getRoutes(profile, include, exclude) : [];
+  const distributions = service.indexOf('cloudfront') !== -1 ? await getDistributions(profile, include, exclude) : [];
 
   return {
     functions,
     tables,
     clusters,
     routes,
+    distributions,
   };
 }
