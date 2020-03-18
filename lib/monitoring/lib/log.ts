@@ -1,6 +1,6 @@
-import { TableItem, FunctionItem, ClusterItem } from './types';
+import { TableItem, FunctionItem, ClusterItem, RouteItem, AWSItem } from './types';
 
-export const listFunctions = (functions: FunctionItem[]): void => {
+function listFunctions(functions: FunctionItem[]): void {
   if (functions.length === 0) {
     return;
   }
@@ -12,9 +12,9 @@ export const listFunctions = (functions: FunctionItem[]): void => {
     console.log('    arn:', f.FunctionArn);
   });
   console.log('');
-};
+}
 
-export const listTables = (tables: TableItem[]): void => {
+function listTables(tables: TableItem[]): void {
   if (tables.length === 0) {
     return;
   }
@@ -26,9 +26,9 @@ export const listTables = (tables: TableItem[]): void => {
     console.log('    arn:', t.TableArn);
   });
   console.log('');
-};
+}
 
-export const listClusters = (clusters: ClusterItem[]): void => {
+function listClusters(clusters: ClusterItem[]): void {
   if (clusters.length === 0) {
     return;
   }
@@ -40,4 +40,27 @@ export const listClusters = (clusters: ClusterItem[]): void => {
     console.log('    arn:', c.clusterArn);
   });
   console.log('');
-};
+}
+
+function listRoutes(routes: RouteItem[]): void {
+  if (routes.length === 0) {
+    return;
+  }
+
+  console.log('');
+  console.log('API Gateway routes:');
+  routes.forEach(r => {
+    console.log('  - name:', r.name);
+  });
+  console.log('');
+}
+
+/**
+ * Log all AWS items
+ */
+export function logAWS(aws: AWSItem): void {
+  listFunctions(aws.functions);
+  listTables(aws.tables);
+  listClusters(aws.clusters);
+  listRoutes(aws.routes);
+}

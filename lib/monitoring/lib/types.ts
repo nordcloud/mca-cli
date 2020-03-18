@@ -18,10 +18,23 @@ export interface ClusterItem {
   clusterArn: string;
 }
 
+export interface RouteItemEndpoint {
+  types: string[];
+}
+
+export interface RouteItem {
+  id: string;
+  name: string;
+  createdDate: number;
+  apiKeySource: string;
+  endpointConfiguration: RouteItemEndpoint;
+}
+
 export interface AWSItem {
   functions: FunctionItem[];
   tables: TableItem[];
   clusters: ClusterItem[];
+  routes: RouteItem[];
 }
 
 export interface ListFunctionResponse {
@@ -42,6 +55,10 @@ export interface ListClusterResponse {
 
 export interface DescribeClusterResponse {
   clusters: ClusterItem[];
+}
+
+export interface ListRouteResponse {
+  items: RouteItem[];
 }
 
 export interface Args {
@@ -180,7 +197,7 @@ export interface ConfigMetricAlarms {
 }
 
 export interface ConfigLocal {
-  arn: string;
+  arn?: string;
   config?: ConfigMetricAlarms;
 }
 

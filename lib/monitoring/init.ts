@@ -33,8 +33,8 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
         alias: 'service',
         describe: 'List of services',
         type: 'array',
-        choices: ['lambda', 'dynamodb', 'ecs'],
-        default: ['lambda', 'dynamodb', 'ecs'],
+        choices: ['lambda', 'dynamodb', 'ecs', 'apigateway'],
+        default: ['lambda', 'dynamodb', 'ecs', 'apigateway'],
       },
       d: {
         alias: 'dry',
@@ -48,10 +48,7 @@ export const handler = async (args: Args): Promise<void> => {
   const aws = await lib.getAllFromAWS(args);
 
   if (args.dry) {
-    const { functions, tables, clusters } = aws;
-    lib.listFunctions(functions);
-    lib.listTables(tables);
-    lib.listClusters(clusters);
+    lib.logAWS(aws);
     return;
   }
 

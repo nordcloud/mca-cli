@@ -189,7 +189,67 @@ function addClusters(aws: AWSItem, config: Config): Config {
   };
 }
 
-export const createConfig = (aws: AWSItem, args: Args): Config => {
+function addRoutes(aws: AWSItem, config: Config): Config {
+  if (aws.routes.length === 0) {
+    return config;
+  }
+
+  const defaultConfig = {
+    '4XXError': {
+      enabled: true,
+      alarm: {
+        threshold: 10,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        unit: 'COUNT',
+        statistic: 'Sum',
+      },
+    },
+    '5XXError': {
+      enabled: true,
+      alarm: {
+        threshold: 1,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        unit: 'COUNT',
+        statistic: 'Sum',
+      },
+    },
+    Latency: {
+      enabled: true,
+      alarm: {
+        threshold: 10000,
+        evaluationPeriods: 5,
+      },
+      metric: {
+        period: { minutes: 5 },
+        unit: 'MILLISECOND',
+      },
+    },
+    CacheHitCount: { enabled: false },
+    CacheMissCount: { enabled: false },
+    Count: { enabled: false },
+    IntegrationLatency: { enabled: false },
+  };
+
+  return {
+    ...config,
+    routes: aws.routes.reduce((acc, r) => ({ ...acc, [r.name]: {} }), {}),
+    custom: {
+      ...config.custom,
+      default: {
+        ...config.custom.default,
+        apiGateway: defaultConfig,
+      },
+    },
+  };
+}
+
+export function createConfig(aws: AWSItem, args: Args): Config {
   let conf: Config = {
     cli: {
       version: 1,
@@ -222,8 +282,9 @@ export const createConfig = (aws: AWSItem, args: Args): Config => {
   conf = addLambdas(aws, conf);
   conf = addTables(aws, conf);
   conf = addClusters(aws, conf);
+  conf = addRoutes(aws, conf);
   return conf;
-};
+}
 
 export const dumpNewConfig = (aws: AWSItem, args: Args): string => {
   return yaml.dump(createConfig(aws, args));

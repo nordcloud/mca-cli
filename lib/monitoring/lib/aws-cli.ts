@@ -1,15 +1,13 @@
 import * as ch from 'child_process';
 import { isMatch } from 'micromatch';
 
-export * from './types';
-
 import * as types from './types';
 
-const match = (str: string, include: string[], exclude: string[]): boolean => {
+function match(str: string, include: string[], exclude: string[]): boolean {
   return (include.length === 0 || isMatch(str, include)) && (exclude.length === 0 || !isMatch(str, exclude));
-};
+}
 
-const exec = (exe: string, args: string[]): Promise<{ stdout: string; stderr: string }> => {
+function exec(exe: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     let stdout = '';
     let stderr = '';
@@ -31,13 +29,13 @@ const exec = (exe: string, args: string[]): Promise<{ stdout: string; stderr: st
       resolve({ stdout: stdout.toString(), stderr: stderr.toString() });
     });
   });
-};
+}
 
-export const getFunctions = async (
+export async function getFunctions(
   profile: string,
   include: string[],
   exclude: string[],
-): Promise<types.FunctionItem[]> => {
+): Promise<types.FunctionItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'lambda', 'list-functions']);
   if (stderr !== '') {
     console.log(stderr);
@@ -47,9 +45,9 @@ export const getFunctions = async (
   }
   const resp: types.ListFunctionResponse = JSON.parse(stdout);
   return resp.Functions.filter(f => match(f.FunctionName, include, exclude));
-};
+}
 
-export const getTables = async (profile: string, include: string[], exclude: string[]): Promise<types.TableItem[]> => {
+export async function getTables(profile: string, include: string[], exclude: string[]): Promise<types.TableItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'dynamodb', 'list-tables']);
   if (stderr !== '') {
     console.log(stderr);
@@ -75,13 +73,9 @@ export const getTables = async (profile: string, include: string[], exclude: str
   );
 
   return tables.filter(t => match(t.TableName, include, exclude));
-};
+}
 
-export const getClusters = async (
-  profile: string,
-  include: string[],
-  exclude: string[],
-): Promise<types.ClusterItem[]> => {
+export async function getClusters(profile: string, include: string[], exclude: string[]): Promise<types.ClusterItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'ecs', 'list-clusters']);
   if (stderr !== '') {
     console.log(stderr);
@@ -113,17 +107,32 @@ export const getClusters = async (
   );
 
   return clusters.reduce((acc, c) => [...acc, ...c], []).filter(t => t && match(t.clusterName, include, exclude));
-};
+}
 
-export const getAllFromAWS = async (args: types.Args): Promise<types.AWSItem> => {
+export async function getRoutes(profile: string, include: string[], exclude: string[]): Promise<types.RouteItem[]> {
+  const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'apigateway', 'get-rest-apis']);
+  if (stderr !== '') {
+    console.log(stderr);
+  }
+  if (stdout === '') {
+    return [];
+  }
+  const { items }: types.ListRouteResponse = JSON.parse(stdout);
+
+  return items.filter(r => match(r.name, include, exclude));
+}
+
+export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
   const { profile, service, include, exclude } = args;
   const functions = service.indexOf('lambda') !== -1 ? await getFunctions(profile, include, exclude) : [];
   const tables = service.indexOf('dynamodb') !== -1 ? await getTables(profile, include, exclude) : [];
   const clusters = service.indexOf('ecs') !== -1 ? await getClusters(profile, include, exclude) : [];
+  const routes = service.indexOf('apigateway') !== -1 ? await getRoutes(profile, include, exclude) : [];
 
   return {
     functions,
     tables,
     clusters,
+    routes,
   };
-};
+}
