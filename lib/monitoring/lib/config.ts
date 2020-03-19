@@ -349,9 +349,9 @@ export class ConfigGenerator {
             AccountProvisionedWriteCapacityUtilization: { enabled: false },
             UserErrors: { enabled: false },
           },
-        }
-      }
-    }
+        },
+      },
+    };
   }
 
   public addClusters({ clusters }: AWSItem): void {
