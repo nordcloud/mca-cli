@@ -10,10 +10,10 @@ const args: Args = {
   include: [],
   exclude: [],
   dry: true,
-}
+};
 
 test('generate config', t => {
-  console.log(ConfigGenerator)
-  const config = new ConfigGenerator(args)
-  t.is(config.getConfig().cli.version, 1)
+  console.log(ConfigGenerator);
+  const config = new ConfigGenerator(args);
+  t.is(config.getConfig().cli.version, 1);
 });

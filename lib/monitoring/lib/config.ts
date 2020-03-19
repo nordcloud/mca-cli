@@ -38,7 +38,7 @@ export class ConfigGenerator {
     };
   }
 
-  public async loadFromFile(configPath: string) {
+  public async loadFromFile(configPath: string): Promise<void> {
     const content = await fs.readFile(configPath);
     this.config = yaml.load(content);
   }
@@ -76,12 +76,12 @@ export class ConfigGenerator {
         includes: args.include,
         excludes: args.exclude,
       },
-    }
+    };
   }
 
   /**
-  * Convert local config type to default config
-  */
+   * Convert local config type to default config
+   */
   private configLocalTypeToDefault(confType: ConfigLocalType): ConfigDefaultType | undefined {
     switch (confType) {
       case ConfigLocalType.Lambda:
@@ -100,8 +100,8 @@ export class ConfigGenerator {
   }
 
   /**
-  * Convert local config type to default config
-  */
+   * Convert local config type to default config
+   */
   private configDefaultTypeToLocal(confType: ConfigDefaultType): ConfigLocalType | undefined {
     switch (confType) {
       case ConfigDefaultType.Lambda:
@@ -126,7 +126,7 @@ export class ConfigGenerator {
    */
   private combineSingle(localKey: ConfigLocalType, configNew: Config): void {
     if (configNew?.[localKey]) {
-      this.config[localKey] = Object.keys(configNew?.[localKey]|| []).reduce(
+      this.config[localKey] = Object.keys(configNew?.[localKey] || []).reduce(
         (acc, key) => ({
           ...acc,
           [key]: {
@@ -156,7 +156,7 @@ export class ConfigGenerator {
     this.combineSingle(ConfigLocalType.Cluster, configNew);
     this.combineSingle(ConfigLocalType.ApiGateway, configNew);
     this.combineSingle(ConfigLocalType.Cloudfront, configNew);
-  };
+  }
 
   public addLambdas(aws: AWSItem): void {
     if (aws.functions.length === 0) {
@@ -285,7 +285,8 @@ export class ConfigGenerator {
     };
 
     this.config = {
-      ...this.config, tables: aws.tables.reduce((acc, t) => ({ ...acc, [t.TableName]: { arn: t.TableArn } }), {}),
+      ...this.config,
+      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t.TableName]: { arn: t.TableArn } }), {}),
       custom: {
         ...this.config.custom,
         default: {
