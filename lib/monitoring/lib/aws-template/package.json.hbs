@@ -8,8 +8,9 @@
     "watch": "tsc -w",
     "synth": "cdk synth",
     "version": "cdk --version",
+    "bootstrap": "cdk --profile {{ profile }} bootstrap",
     "diff": "cdk --profile {{ profile }} diff",
-    "deploy": "cdk deploy --profile {{ profile }}"
+    "deploy": "cdk --profile {{ profile }} deploy"
   },
   "devDependencies": {
     "@types/node": "10.17.5",
