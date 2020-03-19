@@ -1,7 +1,7 @@
 import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
 
-import { Args, Config, AWSItem, ConfigCLI, ConfigLocalType, ConfigDefaultType } from './types';
+import { Args, Config, AWSItem, ConfigLocalType, ConfigDefaultType } from './types';
 import diff from './diff';
 
 export class ConfigGenerator {
@@ -38,45 +38,87 @@ export class ConfigGenerator {
     };
   }
 
+  /**
+   * Load config from file
+   *
+   * Will overwrite the current config
+   */
   public async loadFromFile(configPath: string): Promise<void> {
     const content = await fs.readFile(configPath);
     this.config = yaml.load(content);
   }
 
+  /**
+   * Dump config as yaml
+   */
   public dumpYML(): string {
     return yaml.dump(this.config);
   }
 
+  /**
+   * Get config object
+   */
   public getConfig(): Config {
     return this.config;
   }
 
-  public getCLI(): ConfigCLI {
-    return this.config.cli;
-  }
-
-  public diff(otherConfig: ConfigGenerator): void {
-    diff(this.dumpYML(), otherConfig.dumpYML());
-  }
-
-  public async write(path: string): Promise<void> {
-    await fs.writeFile(path, this.dumpYML());
+  /**
+   * Combine config and cli args
+   */
+  public combineCLIArgs(args: Args): Args {
+    return {
+      ...args,
+      profile: args.profile || this.config.cli.profile,
+      service: args.service || this.config.cli.services,
+      include: args.include || this.config.cli.includes,
+      exclude: args.exclude || this.config.cli.excludes,
+    };
   }
 
   /**
-   * Add CLI
+   * Update CLI args
    */
-  public addCLI(args: Args): void {
+  public updateCLIArgs(args: Args): void {
+    // Initially generated config might have undefined sns topic
+    if (this.config.custom.snsTopic.id.search('undefined') !== -1) {
+      this.config = {
+        ...this.config,
+        custom: {
+          ...this.config.custom,
+          snsTopic: {
+            ...this.config.custom.snsTopic,
+            id: `${args.profile}-alarts-alarm`,
+          },
+        },
+      };
+    }
+
     this.config = {
       ...this.config,
       cli: {
-        version: 1,
+        ...this.config.cli,
         profile: args.profile,
         services: args.service,
         includes: args.include,
         excludes: args.exclude,
       },
     };
+  }
+
+  /**
+   * Generate diff of two configs
+   */
+  public diff(otherConfig: ConfigGenerator): void {
+    const other = { ...otherConfig.getConfig() };
+    other.custom = this.config.custom;
+    diff(this.dumpYML(), yaml.dump(other));
+  }
+
+  /**
+   * Write config to file
+   */
+  public async write(path: string): Promise<void> {
+    await fs.writeFile(path, this.dumpYML());
   }
 
   /**

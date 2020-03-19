@@ -43,14 +43,13 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 
 export const handler = async (args: lib.Args): Promise<void> => {
   const config = new lib.ConfigGenerator(args);
-  config.loadFromFile(args.config);
-
-  const combinedArgs = { ...(config.getCLI() || {}), ...args };
-  config.addCLI(combinedArgs);
+  await config.loadFromFile(args.config);
+  const combinedArgs = config.combineCLIArgs(args);
+  config.updateCLIArgs(combinedArgs);
 
   const aws = await lib.getAllFromAWS(combinedArgs);
 
-  const newConfig = new lib.ConfigGenerator(args);
+  const newConfig = new lib.ConfigGenerator(combinedArgs);
   newConfig.addAllLocal(aws);
 
   config.combine(newConfig);
