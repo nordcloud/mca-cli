@@ -17,17 +17,7 @@ export class ConfigGenerator {
         excludes: args.exclude,
       },
       custom: {
-        default: {
-          account: {
-            AccountMaxReads: { enabled: false },
-            AccountMaxTableLevelReads: { enabled: false },
-            AccountMaxTableLevelWrites: { enabled: false },
-            AccountMaxWrites: { enabled: false },
-            AccountProvisionedReadCapacityUtilization: { enabled: false },
-            AccountProvisionedWriteCapacityUtilization: { enabled: false },
-            UserErrors: { enabled: false },
-          },
-        },
+        default: {},
         snsTopic: {
           name: 'Topic for mca monitoring alarms',
           id: `${args.profile}-alarts-alarm`,
@@ -339,6 +329,31 @@ export class ConfigGenerator {
     };
   }
 
+  public addAccount({ tables }: AWSItem): void {
+    if (tables.length === 0) {
+      return;
+    }
+
+    this.config = {
+      ...this.config,
+      custom: {
+        ...this.config.custom,
+        default: {
+          ...this.config.custom.default,
+          account: {
+            AccountMaxReads: { enabled: false },
+            AccountMaxTableLevelReads: { enabled: false },
+            AccountMaxTableLevelWrites: { enabled: false },
+            AccountMaxWrites: { enabled: false },
+            AccountProvisionedReadCapacityUtilization: { enabled: false },
+            AccountProvisionedWriteCapacityUtilization: { enabled: false },
+            UserErrors: { enabled: false },
+          },
+        }
+      }
+    }
+  }
+
   public addClusters({ clusters }: AWSItem): void {
     if (clusters.length === 0) {
       return;
@@ -505,6 +520,7 @@ export class ConfigGenerator {
   public addAllLocal(aws: AWSItem): void {
     this.addLambdas(aws);
     this.addTables(aws);
+    this.addAccount(aws);
     this.addClusters(aws);
     this.addRoutes(aws);
     this.addDistributions(aws);
