@@ -8,19 +8,21 @@ export class ConfigGenerator {
   private config: Config;
 
   constructor(args: Args) {
+    const { profile, service, include, exclude } = args;
+
     this.config = {
       cli: {
         version: 1,
-        profile: args.profile,
-        services: args.service,
-        includes: args.include,
-        excludes: args.exclude,
+        profile,
+        services: service,
+        includes: include,
+        excludes: exclude,
       },
       custom: {
         default: {},
         snsTopic: {
           name: 'Topic for mca monitoring alarms',
-          id: `${args.profile}-alarts-alarm`,
+          id: `${args.profile}-alerts-alarm`,
           endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
           emails: [],
         },
@@ -56,12 +58,15 @@ export class ConfigGenerator {
    * Combine config and cli args
    */
   public combineCLIArgs(args: Args): Args {
+    const { profile, service, include, exclude } = args;
+    const { profile: cliProfile, services, includes, excludes } = this.config.cli;
+
     return {
       ...args,
-      profile: args.profile || this.config.cli.profile,
-      service: args.service || this.config.cli.services,
-      include: args.include || this.config.cli.includes,
-      exclude: args.exclude || this.config.cli.excludes,
+      profile: profile || cliProfile,
+      service: service || services,
+      include: include || includes,
+      exclude: exclude || excludes,
     };
   }
 
@@ -69,6 +74,8 @@ export class ConfigGenerator {
    * Update CLI args
    */
   public updateCLIArgs(args: Args): void {
+    const { profile, service, include, exclude } = args;
+
     // Initially generated config might have undefined sns topic
     if (this.config.custom.snsTopic.id.search('undefined') !== -1) {
       this.config = {
@@ -77,7 +84,7 @@ export class ConfigGenerator {
           ...this.config.custom,
           snsTopic: {
             ...this.config.custom.snsTopic,
-            id: `${args.profile}-alarts-alarm`,
+            id: `${profile}-alerts-alarm`,
           },
         },
       };
@@ -87,10 +94,10 @@ export class ConfigGenerator {
       ...this.config,
       cli: {
         ...this.config.cli,
-        profile: args.profile,
-        services: args.service,
-        includes: args.include,
-        excludes: args.exclude,
+        profile,
+        services: service,
+        includes: include,
+        excludes: exclude,
       },
     };
   }
