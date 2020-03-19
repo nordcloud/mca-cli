@@ -254,7 +254,7 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           threshold: 10,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -266,7 +266,7 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           threshold: 200,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -278,7 +278,7 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           threshold: 2000,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -290,7 +290,7 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           threshold: 10,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -364,7 +364,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           threshold: 90,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -375,7 +375,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           threshold: 90,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -410,7 +410,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           threshold: 10,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -422,7 +422,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           threshold: 1,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -434,7 +434,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           threshold: 10000,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -470,7 +470,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           threshold: 5,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
@@ -482,7 +482,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           threshold: 1,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
         metric: {
           period: { minutes: 5 },
