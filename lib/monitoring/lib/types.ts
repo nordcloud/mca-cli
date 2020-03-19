@@ -258,3 +258,20 @@ export interface Config {
   distributions?: ConfigLocals;
   custom: ConfigCustom;
 }
+
+export enum ConfigLocalType {
+  Lambda = 'lambdas',
+  Table = 'tables',
+  Cluster = 'clusters',
+  ApiGateway = 'routes',
+  Cloudfront = 'distributions',
+}
+
+export enum ConfigDefaultType {
+  Table = 'table',
+  Lambda = 'lambda',
+  Account = 'account',
+  Cluster = 'cluster',
+  ApiGateway = 'apiGateway',
+  Cloudfront = 'cloudfront',
+}

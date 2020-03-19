@@ -3,7 +3,7 @@ import * as hb from 'handlebars';
 
 import * as fs from './fsUtil';
 import { Args, AWSItem } from './types';
-import * as conf from './config';
+import { ConfigGenerator } from './config';
 
 export const generatePath = (profile: string): string => {
   return path.join(process.cwd(), `${profile}-monitoring`);
@@ -49,7 +49,9 @@ const generateTemplate = async (
 
 const generateConfig = async (aws: AWSItem, args: Args, outputPath: string): Promise<void> => {
   const filePath = path.join(outputPath, 'config.yml');
-  return fs.writeFile(filePath, conf.dumpNewConfig(aws, args));
+  const config = new ConfigGenerator(args);
+  config.addAllLocal(aws);
+  await config.write(filePath);
 };
 
 export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string): void => {
@@ -67,6 +69,14 @@ export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string)
   console.log('Clusters:', aws.clusters.length);
   aws.clusters.forEach(t => {
     console.log('  -', t.clusterName);
+  });
+  console.log('Routes:', aws.routes.length);
+  aws.routes.forEach(r => {
+    console.log('  -', r.name);
+  });
+  console.log('Distributions:', aws.distributions.length);
+  aws.distributions.forEach(d => {
+    console.log('  -', d.Id);
   });
   console.log('');
 };
