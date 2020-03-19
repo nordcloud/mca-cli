@@ -7,34 +7,26 @@
     "build": "tsc",
     "watch": "tsc -w",
     "synth": "cdk synth",
-    "diff": "cdk diff --profile {{ profile }}",
-    "deploy": "cdk deploy --profile {{ profile }}"
+    "version": "cdk --version",
+    "bootstrap": "cdk --profile {{ profile }} bootstrap",
+    "diff": "cdk --profile {{ profile }} diff",
+    "deploy": "cdk --profile {{ profile }} deploy"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "^1.24.0",
-    "@types/js-yaml": "^3.12.2",
     "@types/node": "10.17.5",
-    "aws-cdk": "^1.24.0",
-    "ts-node": "^8.1.0",
-    "typescript": "~3.7.2",
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^2.20.0",
+    "aws-cdk": "^1.26.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "ts-node": "^8.1.0",
+    "typescript": "~3.7.2"
   },
   "dependencies": {
-    "@aws-cdk/aws-cloudformation": "^1.24.0",
-    "@aws-cdk/aws-cloudwatch": "^1.24.0",
-    "@aws-cdk/aws-cloudwatch-actions": "^1.24.0",
-    "@aws-cdk/aws-dynamodb": "^1.24.0",
-    "@aws-cdk/aws-lambda": "^1.24.0",
-    "@aws-cdk/aws-sns": "^1.24.0",
-    "@aws-cdk/aws-sns-subscriptions": "^1.24.0",
-    "@aws-cdk/core": "^1.24.0",
-    "js-yaml": "^3.13.1"
+    "mca-monitoring": "git+ssh://git@bitbucket.org:nordcloud/mca-monitoring.git"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
@@ -54,14 +46,5 @@
     "singleQuote": true,
     "printWidth": 120,
     "tabWidth": 2
-  },
-  "ava": {
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register",
-      "tsconfig-paths/register"
-    ]
   }
 }

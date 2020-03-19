@@ -19,13 +19,13 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       },
       i: {
         alias: 'include',
-        describe: 'List of included arns',
+        describe: 'List of included names',
         type: 'array',
         default: [],
       },
       e: {
         alias: 'exclude',
-        describe: 'List of excluded arns',
+        describe: 'List of excluded names',
         type: 'array',
         default: [],
       },
@@ -33,8 +33,8 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
         alias: 'service',
         describe: 'List of services',
         type: 'array',
-        choices: ['lambda', 'dynamodb'],
-        default: ['lambda', 'dynamodb'],
+        choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront'],
+        default: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront'],
       },
       d: {
         alias: 'dry',
@@ -45,15 +45,12 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: Args): Promise<void> => {
-  const { profile, service, include, exclude, dry } = args;
-  const functions = service.indexOf('lambda') !== -1 ? await lib.getFunctions(profile, include, exclude) : [];
-  const tables = service.indexOf('dynamodb') !== -1 ? await lib.getTables(profile, include, exclude) : [];
+  const aws = await lib.getAllFromAWS(args);
 
-  if (dry) {
-    lib.listFunctions(functions);
-    lib.listTables(tables);
+  if (args.dry) {
+    lib.logAWS(aws);
     return;
   }
 
-  await lib.generateMonitoring(functions, tables, args);
+  await lib.generateMonitoring(aws, args);
 };

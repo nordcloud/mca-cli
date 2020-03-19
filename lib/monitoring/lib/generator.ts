@@ -2,8 +2,8 @@ import * as path from 'path';
 import * as hb from 'handlebars';
 
 import * as fs from './fsUtil';
-import { TableItem, FunctionItem, Args } from './types';
-import * as conf from './config';
+import { Args, AWSItem } from './types';
+import { ConfigGenerator } from './config';
 
 export const generatePath = (profile: string): string => {
   return path.join(process.cwd(), `${profile}-monitoring`);
@@ -35,7 +35,7 @@ const generateTemplate = async (
 
   // Generate file path
   const relativePath = path.relative(templateFolder, templatePath);
-  const filename = path.basename(relativePath, '.hb');
+  const filename = path.basename(relativePath, '.hbs');
   const folderPath = path.dirname(relativePath);
   const filePath = path.join(outputPath, folderPath, filename);
 
@@ -47,47 +47,52 @@ const generateTemplate = async (
   await fs.writeFile(filePath, template(args));
 };
 
-const generateConfig = async (
-  functions: FunctionItem[],
-  tables: TableItem[],
-  args: Args,
-  outputPath: string,
-): Promise<void> => {
+const generateConfig = async (aws: AWSItem, args: Args, outputPath: string): Promise<void> => {
   const filePath = path.join(outputPath, 'config.yml');
-  return fs.writeFile(filePath, conf.dumpNewConfig(functions, tables, args));
+  const config = new ConfigGenerator(args);
+  config.addAllLocal(aws);
+  await config.write(filePath);
 };
 
-export const logGenerateSuccess = (
-  functions: FunctionItem[],
-  tables: TableItem[],
-  args: Args,
-  outputPath: string,
-): void => {
+export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string): void => {
   console.log('');
   console.log('Monitoring generated successfully to', outputPath);
-  console.log('Lambdas:', functions.length);
-  functions.forEach(f => {
+
+  console.log('Lambdas:', aws.functions.length);
+  aws.functions.forEach(f => {
     console.log('  -', f.FunctionName);
   });
-  console.log('Tables:', tables.length);
-  tables.forEach(t => {
+  console.log('Tables:', aws.tables.length);
+  aws.tables.forEach(t => {
     console.log('  -', t.TableName);
+  });
+  console.log('Clusters:', aws.clusters.length);
+  aws.clusters.forEach(t => {
+    console.log('  -', t.clusterName);
+  });
+  console.log('Routes:', aws.routes.length);
+  aws.routes.forEach(r => {
+    console.log('  -', r.name);
+  });
+  console.log('Distributions:', aws.distributions.length);
+  aws.distributions.forEach(d => {
+    console.log('  -', d.Id);
   });
   console.log('');
 };
 
-export const generateMonitoring = async (functions: FunctionItem[], tables: TableItem[], args: Args): Promise<void> => {
+export const generateMonitoring = async (aws: AWSItem, args: Args): Promise<void> => {
   const outputPath = args.output ? path.resolve(args.output) : generatePath(args.profile);
 
   await fs.mkdir(outputPath, { recursive: true });
 
-  const templateFolder = path.join(__dirname, 'template');
+  const templateFolder = path.join(__dirname, 'aws-template');
   const filePaths = await getTemplateFiles(templateFolder);
 
   await Promise.all([
     ...filePaths.map(p => generateTemplate(p, templateFolder, args, outputPath)),
-    generateConfig(functions, tables, args, outputPath),
+    generateConfig(aws, args, outputPath),
   ]);
 
-  logGenerateSuccess(functions, tables, args, outputPath);
+  logGenerateSuccess(aws, args, outputPath);
 };

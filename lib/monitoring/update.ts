@@ -19,19 +19,19 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
     },
     i: {
       alias: 'include',
-      describe: 'List of included arns',
+      describe: 'List of included names',
       type: 'array',
     },
     e: {
       alias: 'exclude',
-      describe: 'List of excluded arns',
+      describe: 'List of excluded names',
       type: 'array',
     },
     s: {
       alias: 'service',
       describe: 'List of services',
       type: 'array',
-      choices: ['lambda', 'dynamodb'],
+      choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront'],
     },
     d: {
       alias: 'dry',
@@ -42,19 +42,22 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: lib.Args): Promise<void> => {
-  const config = await lib.loadConfig(args.config);
-  const combinedArgs = { ...(config?.cli || {}), ...args };
-  const { profile, service, include, exclude, dry } = combinedArgs;
+  const config = new lib.ConfigGenerator(args);
+  await config.loadFromFile(args.config);
+  const combinedArgs = config.combineCLIArgs(args);
+  config.updateCLIArgs(combinedArgs);
 
-  const functions = service.indexOf('lambda') !== -1 ? await lib.getFunctions(profile, include, exclude) : [];
-  const tables = service.indexOf('dynamodb') !== -1 ? await lib.getTables(profile, include, exclude) : [];
+  const aws = await lib.getAllFromAWS(combinedArgs);
 
-  const newConfig = lib.combineConfig(config, lib.createConfig(functions, tables, combinedArgs));
+  const newConfig = new lib.ConfigGenerator(combinedArgs);
+  newConfig.addAllLocal(aws);
 
-  if (dry) {
-    lib.diffConfig(args.config, newConfig);
+  config.combine(newConfig);
+
+  if (args.dry) {
+    config.diff(newConfig);
     return;
   }
 
-  await lib.writeConfig(args.config, newConfig);
+  await config.write(args.config);
 };
