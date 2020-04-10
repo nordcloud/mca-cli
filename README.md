@@ -16,9 +16,9 @@ CLI to help automating MCA work
 ### Folder organization
 
 - src (Contains source files)
-  - bin (Starting point for cli app)
-  - cmd (Command line configs using yargs commandDir)
-  - lib (Code for to commands)
+    - bin (Starting point for cli app)
+    - cmd (Command line configs using yargs commandDir)
+    - lib (Code for to commands)
 - assets (Assets required for the command line)
 - dist (Build folder, same as src but with js files)
 
