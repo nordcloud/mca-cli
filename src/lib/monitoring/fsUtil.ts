@@ -45,3 +45,11 @@ export const mkdir = (path: string, options?: fs.MakeDirectoryOptions): Promise<
     });
   });
 };
+
+export function exists(path: string): Promise<boolean> {
+  return new Promise(resolve => {
+    fs.exists(path, result => {
+      resolve(result);
+    });
+  });
+}

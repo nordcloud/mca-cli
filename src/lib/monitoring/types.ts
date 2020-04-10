@@ -8,6 +8,50 @@ export interface TableItem {
   TableArn: string;
 }
 
+export interface ClusterItem {
+  status: string;
+  clusterName: string;
+  registeredContainerInstancesCount: number;
+  pendingTasksCount: number;
+  runningTasksCount: number;
+  activeServicesCount: number;
+  clusterArn: string;
+}
+
+export interface RouteItemEndpoint {
+  types: string[];
+}
+
+export interface RouteItem {
+  id: string;
+  name: string;
+  createdDate: number;
+  apiKeySource: string;
+  endpointConfiguration: RouteItemEndpoint;
+}
+
+export interface DistributionAliases {
+  Quantatity: number;
+  Items: string[];
+}
+export interface DistributionItem {
+  Id: string;
+  ARN: string;
+  Status: string;
+  LastModifiedTime: string;
+  InProgressInvalidationBatches: number;
+  DomainName: string;
+  Aliases: DistributionAliases;
+}
+
+export interface AWSItem {
+  functions: FunctionItem[];
+  tables: TableItem[];
+  clusters: ClusterItem[];
+  routes: RouteItem[];
+  distributions: DistributionItem[];
+}
+
 export interface ListFunctionResponse {
   Functions: FunctionItem[];
 }
@@ -20,6 +64,26 @@ export interface DescribeTableResponse {
   Table: TableItem;
 }
 
+export interface ListClusterResponse {
+  clusterArns: string[];
+}
+
+export interface DescribeClusterResponse {
+  clusters: ClusterItem[];
+}
+
+export interface ListRouteResponse {
+  items: RouteItem[];
+}
+
+export interface DistributionList {
+  Quantity: number;
+  Items: DistributionItem[];
+}
+export interface ListDistributionResponse {
+  DistributionList: DistributionList;
+}
+
 export interface Args {
   config: string;
   profile: string;
@@ -30,6 +94,9 @@ export interface Args {
   dry: boolean;
 }
 
+/**
+ * CLI config in the config file
+ */
 export interface ConfigCLI {
   version: number;
   profile: string;
@@ -79,6 +146,9 @@ export interface AlarmOptions {
 
 export type DimensionHash = { [dim: string]: object };
 
+/**
+ * Duration values
+ */
 export interface MetricDuration {
   milliseconds?: number;
   seconds?: number;
@@ -150,7 +220,7 @@ export interface ConfigMetricAlarms {
 }
 
 export interface ConfigLocal {
-  arn: string;
+  arn?: string;
   config?: ConfigMetricAlarms;
 }
 
@@ -162,6 +232,9 @@ export interface ConfigCustomDefaults {
   lambda?: ConfigMetricAlarms;
   table?: ConfigMetricAlarms;
   account?: ConfigMetricAlarms;
+  cluster?: ConfigMetricAlarms;
+  apiGateway?: ConfigMetricAlarms;
+  cloudfront?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {
@@ -173,12 +246,32 @@ export interface ConfigCustomSNS {
 
 export interface ConfigCustom {
   default: ConfigCustomDefaults;
-  snsTopics: ConfigCustomSNS;
+  snsTopic: ConfigCustomSNS;
 }
 
 export interface Config {
   cli: ConfigCLI;
-  lambdas: ConfigLocals;
-  tables: ConfigLocals;
+  lambdas?: ConfigLocals;
+  tables?: ConfigLocals;
+  clusters?: ConfigLocals;
+  routes?: ConfigLocals;
+  distributions?: ConfigLocals;
   custom: ConfigCustom;
+}
+
+export enum ConfigLocalType {
+  Lambda = 'lambdas',
+  Table = 'tables',
+  Cluster = 'clusters',
+  ApiGateway = 'routes',
+  Cloudfront = 'distributions',
+}
+
+export enum ConfigDefaultType {
+  Table = 'table',
+  Lambda = 'lambda',
+  Account = 'account',
+  Cluster = 'cluster',
+  ApiGateway = 'apiGateway',
+  Cloudfront = 'cloudfront',
 }
