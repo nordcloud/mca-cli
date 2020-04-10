@@ -1,6 +1,7 @@
 import * as ch from 'child_process';
 import { isMatch } from 'micromatch';
 
+import { error } from '../logger';
 import * as types from './types';
 
 function match(str: string, include: string[], exclude: string[]): boolean {
@@ -38,7 +39,7 @@ export async function getFunctions(
 ): Promise<types.FunctionItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'lambda', 'list-functions']);
   if (stderr !== '') {
-    console.log(stderr);
+    error(stderr);
   }
   if (stdout === '') {
     return [];
@@ -50,7 +51,7 @@ export async function getFunctions(
 export async function getTables(profile: string, include: string[], exclude: string[]): Promise<types.TableItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'dynamodb', 'list-tables']);
   if (stderr !== '') {
-    console.log(stderr);
+    error(stderr);
   }
   if (stdout === '') {
     return [];
@@ -78,7 +79,7 @@ export async function getTables(profile: string, include: string[], exclude: str
 export async function getClusters(profile: string, include: string[], exclude: string[]): Promise<types.ClusterItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'ecs', 'list-clusters']);
   if (stderr !== '') {
-    console.log(stderr);
+    error(stderr);
   }
   if (stdout === '') {
     return [];
@@ -96,7 +97,7 @@ export async function getClusters(profile: string, include: string[], exclude: s
         arn,
       ]);
       if (stderr !== '') {
-        console.log(stderr);
+        error(stderr);
       }
       if (stdout === '') {
         return [];
@@ -112,7 +113,7 @@ export async function getClusters(profile: string, include: string[], exclude: s
 export async function getRoutes(profile: string, include: string[], exclude: string[]): Promise<types.RouteItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'apigateway', 'get-rest-apis']);
   if (stderr !== '') {
-    console.log(stderr);
+    error(stderr);
   }
   if (stdout === '') {
     return [];
@@ -129,7 +130,7 @@ export async function getDistributions(
 ): Promise<types.DistributionItem[]> {
   const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'cloudfront', 'list-distributions']);
   if (stderr !== '') {
-    console.log(stderr);
+    error(stderr);
   }
   if (stdout === '') {
     return [];
