@@ -23,3 +23,4 @@ CLI to help automating MCA work
 ## Testing
 
 - Run tests with `npm run test`
+

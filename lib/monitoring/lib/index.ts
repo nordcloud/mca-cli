@@ -3,3 +3,4 @@ export * from './aws-cli';
 export * from './log';
 export * from './generator';
 export * from './config';
+export * from './validate-command';
