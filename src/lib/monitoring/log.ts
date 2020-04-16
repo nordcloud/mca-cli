@@ -1,17 +1,18 @@
 import { AWSItem } from './types';
+import { highlight } from '../logger';
 
 function listFunctions({ functions }: AWSItem): void {
   if (functions.length === 0) {
     return;
   }
 
-  console.log('');
-  console.log('Lambda Functions:');
+  highlight('');
+  highlight('Lambda Functions:');
   functions.forEach(f => {
-    console.log('  - name:', f.FunctionName);
-    console.log('    arn:', f.FunctionArn);
+    highlight('  - name:', f.FunctionName);
+    highlight('    arn:', f.FunctionArn);
   });
-  console.log('');
+  highlight('');
 }
 
 function listTables({ tables }: AWSItem): void {
@@ -19,13 +20,13 @@ function listTables({ tables }: AWSItem): void {
     return;
   }
 
-  console.log('');
-  console.log('DynamoDB Tables:');
+  highlight('');
+  highlight('DynamoDB Tables:');
   tables.forEach(t => {
-    console.log('  - name:', t.TableName);
-    console.log('    arn:', t.TableArn);
+    highlight('  - name:', t.TableName);
+    highlight('    arn:', t.TableArn);
   });
-  console.log('');
+  highlight('');
 }
 
 function listClusters({ clusters }: AWSItem): void {
@@ -33,13 +34,13 @@ function listClusters({ clusters }: AWSItem): void {
     return;
   }
 
-  console.log('');
-  console.log('ECS clusters:');
+  highlight('');
+  highlight('ECS clusters:');
   clusters.forEach(c => {
-    console.log('  - name:', c.clusterName);
-    console.log('    arn:', c.clusterArn);
+    highlight('  - name:', c.clusterName);
+    highlight('    arn:', c.clusterArn);
   });
-  console.log('');
+  highlight('');
 }
 
 function listRoutes({ routes }: AWSItem): void {
@@ -47,12 +48,12 @@ function listRoutes({ routes }: AWSItem): void {
     return;
   }
 
-  console.log('');
-  console.log('API Gateway routes:');
+  highlight('');
+  highlight('API Gateway routes:');
   routes.forEach(r => {
-    console.log('  - name:', r.name);
+    highlight('  - name:', r.name);
   });
-  console.log('');
+  highlight('');
 }
 
 function listDistributions({ distributions }: AWSItem): void {
@@ -60,19 +61,19 @@ function listDistributions({ distributions }: AWSItem): void {
     return;
   }
 
-  console.log('');
-  console.log('Cloudfront ditributions:');
+  highlight('');
+  highlight('Cloudfront ditributions:');
   distributions.forEach(d => {
-    console.log('  - name:', d.Id);
-    console.log('    arn:', d.ARN);
+    highlight('  - name:', d.Id);
+    highlight('    arn:', d.ARN);
     if (d.Aliases.Items.length !== 0) {
-      console.log('    aliases:');
+      highlight('    aliases:');
       d.Aliases.Items.forEach(a => {
-        console.log('      -', a);
+        highlight('      -', a);
       });
     }
   });
-  console.log('');
+  highlight('');
 }
 
 /**

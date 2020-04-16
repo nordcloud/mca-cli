@@ -9,11 +9,11 @@ interface PkgJson {
 }
 
 // Setup version from package.json
-const pkgPath: string = path.join(__dirname, '..', 'package.json');
+const pkgPath: string = path.join(__dirname, '..', '..', 'package.json');
 const pkg: PkgJson = JSON.parse(fs.readFileSync(pkgPath).toString());
 
 yargs
   .version(pkg.version)
-  .commandDir(path.join(__dirname, '..', 'lib'))
+  .commandDir(path.join(__dirname, '..', 'cmd'))
   .demandCommand()
   .help().argv;

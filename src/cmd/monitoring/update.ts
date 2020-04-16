@@ -1,6 +1,6 @@
 import { Argv } from 'yargs';
 
-import * as lib from './lib';
+import { monitoring } from '../../lib';
 
 export const command = 'update [options]';
 export const desc = 'Update monitoring config';
@@ -38,18 +38,22 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       default: false,
       type: 'boolean',
     },
+    interactive: {
+      default: false,
+      type: 'boolean',
+    },
   });
 };
 
-export const handler = async (args: lib.Args): Promise<void> => {
-  const config = new lib.ConfigGenerator(args);
+export const handler = async (args: monitoring.Args): Promise<void> => {
+  const config = new monitoring.ConfigGenerator(args);
   await config.loadFromFile(args.config);
   const combinedArgs = config.combineCLIArgs(args);
   config.updateCLIArgs(combinedArgs);
 
-  const aws = await lib.getAllFromAWS(combinedArgs);
+  const aws = await monitoring.getAllFromAWS(combinedArgs);
 
-  const newConfig = new lib.ConfigGenerator(combinedArgs);
+  const newConfig = new monitoring.ConfigGenerator(combinedArgs);
   newConfig.addAllLocal(aws);
 
   config.combine(newConfig);
