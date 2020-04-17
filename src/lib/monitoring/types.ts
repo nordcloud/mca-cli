@@ -219,13 +219,8 @@ export interface ConfigMetricAlarms {
   [key: string]: ConfigMetricAlarm;
 }
 
-export interface ConfigLocal {
-  arn?: string;
-  config?: ConfigMetricAlarms;
-}
-
 export interface ConfigLocals {
-  [key: string]: ConfigLocal;
+  [key: string]: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomDefaults {
