@@ -4,6 +4,7 @@ import * as hb from 'handlebars';
 import * as fs from './fsUtil';
 import { Args, AWSItem } from './types';
 import { ConfigGenerator } from './config';
+import { highlight } from '../logger';
 
 export const generatePath = (profile: string): string => {
   return path.join(process.cwd(), `${profile}-monitoring`);
@@ -55,30 +56,30 @@ const generateConfig = async (aws: AWSItem, args: Args, outputPath: string): Pro
 };
 
 export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string): void => {
-  console.log('');
-  console.log('Monitoring generated successfully to', outputPath);
+  highlight('');
+  highlight('Monitoring generated successfully to', outputPath);
 
-  console.log('Lambdas:', aws.functions.length);
+  highlight('Lambdas:', aws.functions.length);
   aws.functions.forEach(f => {
-    console.log('  -', f.FunctionName);
+    highlight('  -', f.FunctionName);
   });
-  console.log('Tables:', aws.tables.length);
+  highlight('Tables:', aws.tables.length);
   aws.tables.forEach(t => {
-    console.log('  -', t.TableName);
+    highlight('  -', t.TableName);
   });
-  console.log('Clusters:', aws.clusters.length);
+  highlight('Clusters:', aws.clusters.length);
   aws.clusters.forEach(t => {
-    console.log('  -', t.clusterName);
+    highlight('  -', t.clusterName);
   });
-  console.log('Routes:', aws.routes.length);
+  highlight('Routes:', aws.routes.length);
   aws.routes.forEach(r => {
-    console.log('  -', r.name);
+    highlight('  -', r.name);
   });
-  console.log('Distributions:', aws.distributions.length);
+  highlight('Distributions:', aws.distributions.length);
   aws.distributions.forEach(d => {
-    console.log('  -', d.Id);
+    highlight('  -', d.Id);
   });
-  console.log('');
+  highlight('');
 };
 
 export const generateMonitoring = async (aws: AWSItem, args: Args): Promise<void> => {
@@ -86,7 +87,7 @@ export const generateMonitoring = async (aws: AWSItem, args: Args): Promise<void
 
   await fs.mkdir(outputPath, { recursive: true });
 
-  const templateFolder = path.join(__dirname, 'aws-template');
+  const templateFolder = path.join(__dirname, '..', '..', '..', 'assets', 'monitoring', 'aws-template');
   const filePaths = await getTemplateFiles(templateFolder);
 
   await Promise.all([

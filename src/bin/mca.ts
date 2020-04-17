@@ -3,19 +3,19 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import yargs from 'yargs';
-import { IsValid } from '../lib/monitoring/lib/validate-command';
+import { IsValid } from '../lib/utils/validate-command';
 
 interface PkgJson {
   version: string;
 }
 
 // Setup version from package.json
-const pkgPath: string = path.join(__dirname, '..', 'package.json');
+const pkgPath: string = path.join(__dirname, '..', '..', 'package.json');
 const pkg: PkgJson = JSON.parse(fs.readFileSync(pkgPath).toString());
 
 yargs
   .version(pkg.version)
-  .commandDir(path.join(__dirname, '..', 'lib'))
+  .commandDir(path.join(__dirname, '..', 'cmd'))
   .demandCommand()
   .check(function(argv) {
     if (!IsValid(argv)) {

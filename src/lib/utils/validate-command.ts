@@ -1,33 +1,41 @@
 import fs from 'fs';
 import path from 'path';
-const servicePath = path.join(__dirname, '..', '..');
+const servicePath = path.join(__dirname, '..', '..', 'cmd');
 
 interface Commands {
   [key: string]: Array<string>;
 }
 
 const commands: Commands = {
-  monitoring: ['init', 'update'],
+  monitoring: [],
 };
 const services: Array<string> = [];
 
-console.log(servicePath);
-// Get only .ts ending files (services)
-fs.readdirSync(servicePath).forEach(file => {
-  if (path.extname(file) === '.ts') {
-    const serviceName: string = path.basename(file, path.extname(file));
-    services.push(serviceName);
-    commands[serviceName] = [];
-
-    // Get commands under services
-    fs.readdirSync(path.join(servicePath, serviceName)).forEach(file => {
-      if (path.extname(file) === '.ts') {
-        const filename: string = path.basename(file, path.extname(file));
-        commands[serviceName].push(filename);
-      }
-    });
+function AddCommand(fileName: string, parentFolder?: string): void {
+  const commandName: string = path.basename(fileName, path.extname(fileName));
+  if (parentFolder) {
+    if (!commands[parentFolder]) {
+      commands[parentFolder] = [];
+    }
+    commands[parentFolder].push(commandName);
   }
-});
+}
+
+/**
+ * Recursively get all services and commands under start path
+ */
+(function GetServices(startPath: string, parentFolder?: string): void {
+  fs.readdirSync(startPath).forEach(item => {
+    // Validates to directory or file
+    if (fs.lstatSync(path.join(startPath, item)).isDirectory()) {
+      const serviceName: string = item;
+      services.push(serviceName);
+      GetServices(path.join(startPath, item), serviceName);
+    } else if (fs.lstatSync(path.join(startPath, item)).isFile()) {
+      AddCommand(item, parentFolder);
+    }
+  });
+})(servicePath);
 
 function ValidateService(serviceName: string): boolean {
   return services.includes(serviceName);

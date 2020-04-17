@@ -1,7 +1,6 @@
 import { Argv } from 'yargs';
 
-import * as lib from './lib';
-import { Args } from './lib/types';
+import { monitoring } from '../../lib';
 
 export const command = 'init <profile> [options]';
 export const desc = 'Setup monitoring stack';
@@ -41,16 +40,20 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
         default: false,
         type: 'boolean',
       },
+      interactive: {
+        default: false,
+        type: 'boolean',
+      },
     });
 };
 
-export const handler = async (args: Args): Promise<void> => {
-  const aws = await lib.getAllFromAWS(args);
+export const handler = async (args: monitoring.Args): Promise<void> => {
+  const aws = await monitoring.getAllFromAWS(args);
 
   if (args.dry) {
-    lib.logAWS(aws);
+    monitoring.logAWS(aws);
     return;
   }
 
-  await lib.generateMonitoring(aws, args);
+  await monitoring.generateMonitoring(aws, args);
 };
