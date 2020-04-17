@@ -3,7 +3,7 @@ import * as types from '../../lib/log-retention/aws/types';
 import { SetRetentions } from '../../lib/log-retention/aws/update';
 
 export const command = 'aws <profile> [options]';
-export const desc = 'Set CloudWatch log group retentions by prefix';
+export const desc = 'Set AWS CloudWatch log group retentions by prefix';
 export const builder = (yargs: Argv<{}>): Argv<{}> => {
   return yargs
     .positional('profile', {
