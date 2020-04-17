@@ -203,43 +203,52 @@ export class ConfigGenerator {
     }
 
     const defaultConfig = {
-      errors: {
+      Errors: {
         enabled: true,
         autoResolve: false,
         alarm: {
           threshold: 10,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
       },
-      invocations: {
+      Invocations: {
         enabled: true,
         autoResolve: false,
         alarm: {
           threshold: 200,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
       },
-      duration: {
+      Duration: {
         enabled: true,
         autoResolve: false,
         alarm: {
           threshold: 2000,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
       },
-      throttles: {
+      Throttles: {
         enabled: true,
         autoResolve: false,
         alarm: {
           threshold: 10,
-          evaluationPeriods: 5,
+          evaluationPeriods: 1,
         },
       },
+      DeadLetterErrors: { enabled: false },
+      DestinationDeliveryFailures: { enabled: false },
+      ProvisionedConcurrencyInvocations: { enabled: false },
+      ProvisionedConcurrencySpilloverInvocations: { enabled: false },
+      IteratorAge: { enabled: false },
+      ConcurrencyExecutions: { enabled: false },
+      ProvisionedConcurrencyExecutions: { enabled: false },
+      ProvisionedConcurrencyUtilizations: { enabled: false },
+      UnreservedConcurrentExecutions: { enabled: false },
     };
 
     this.config = {
       ...this.config,
-      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: { arn: f.FunctionArn } }), {}),
+      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: {} }), {}),
       custom: {
         ...this.config.custom,
         default: {
@@ -325,7 +334,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t.TableName]: { arn: t.TableArn } }), {}),
+      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t.TableName]: {} }), {}),
       custom: {
         ...this.config.custom,
         default: {
@@ -396,7 +405,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName]: { arn: c.clusterArn } }), {}),
+      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName]: {} }), {}),
       custom: {
         ...this.config.custom,
         default: {
@@ -513,7 +522,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      distributions: distributions.reduce((acc, d) => ({ ...acc, [d.Id]: { arn: d.ARN } }), {}),
+      distributions: distributions.reduce((acc, d) => ({ ...acc, [d.Id]: {} }), {}),
       custom: {
         ...this.config.custom,
         default: {
