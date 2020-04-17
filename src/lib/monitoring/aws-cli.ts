@@ -2,7 +2,7 @@ import { isMatch } from 'micromatch';
 
 import { error } from '../logger';
 import * as types from './types';
-import { exec } from '../exec';
+import exec from '../exec';
 
 function match(str: string, include: string[], exclude: string[]): boolean {
   return (include.length === 0 || isMatch(str, include)) && (exclude.length === 0 || !isMatch(str, exclude));

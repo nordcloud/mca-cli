@@ -1,6 +1,7 @@
 import * as ch from 'child_process';
+import { ExecResponse } from './types';
 
-export function exec(exe: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
+export default function exec(exe: string, args: string[]): Promise<ExecResponse> {
   return new Promise((resolve, reject) => {
     let stdout = '';
     let stderr = '';

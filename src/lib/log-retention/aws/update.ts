@@ -1,7 +1,8 @@
-import * as types from './types';
-import { exec } from '../../exec';
+import { CmdParams, LogGroup } from './types';
+import { ExecResponse } from '../../types';
+import exec from '../../exec';
 
-export async function GetLogGroups(args: types.CmdParams): Promise<{ stdout: string; stderr: string }> {
+export async function GetLogGroups(args: CmdParams): Promise<ExecResponse> {
   return exec('aws', ['logs', 'describe-log-groups', '--profile', `${args.profile}`, '--region', `${args.region}`]);
 }
 
@@ -9,10 +10,7 @@ export function ValidatePrefix(logGroupName: string, prefix: string): boolean {
   return logGroupName.startsWith(prefix);
 }
 
-export async function SetLogGroupRetention(
-  logGroupName: string,
-  args: types.CmdParams,
-): Promise<{ stdout: string; stderr: string }> {
+export async function SetLogGroupRetention(logGroupName: string, args: CmdParams): Promise<ExecResponse> {
   return exec('aws', [
     'logs',
     'put-retention-policy',
@@ -27,10 +25,10 @@ export async function SetLogGroupRetention(
   ]);
 }
 
-export async function SetRetentions(args: types.CmdParams): Promise<void> {
+export async function SetRetentions(args: CmdParams): Promise<void> {
   const regionLogGroups = await GetLogGroups(args);
 
-  const logGroupNames: string[] = JSON.parse(regionLogGroups.stdout).logGroups.map((group: types.LogGroup) => {
+  const logGroupNames: string[] = JSON.parse(regionLogGroups.stdout).logGroups.map((group: LogGroup) => {
     return group.logGroupName;
   });
 
