@@ -1,35 +1,11 @@
-import * as ch from 'child_process';
 import { isMatch } from 'micromatch';
 
 import { error } from '../logger';
 import * as types from './types';
+import { exec } from '../exec';
 
 function match(str: string, include: string[], exclude: string[]): boolean {
   return (include.length === 0 || isMatch(str, include)) && (exclude.length === 0 || !isMatch(str, exclude));
-}
-
-function exec(exe: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
-  return new Promise((resolve, reject) => {
-    let stdout = '';
-    let stderr = '';
-
-    const child = ch.spawn(exe, args);
-
-    child.stdout.on('data', data => {
-      stdout += data;
-    });
-    child.stderr.on('data', data => {
-      stderr += data;
-    });
-
-    child.on('error', err => {
-      return reject(err);
-    });
-
-    child.on('close', () => {
-      resolve({ stdout: stdout.toString(), stderr: stderr.toString() });
-    });
-  });
 }
 
 export async function getFunctions(
