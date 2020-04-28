@@ -15,6 +15,7 @@
     "lint": "eslint . --ext ts",
     "lint:fix": "eslint . --ext ts --fix",
     "start": "tsc -w -p .",
+    "watch": "tsc -w -p .",
     "build": "tsc -p ."
   },
   "dependencies": {
