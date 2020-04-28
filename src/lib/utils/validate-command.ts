@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { error } from '../logger';
+
 const servicePath = path.join(__dirname, '..', '..', 'cmd');
 
 interface Commands {
@@ -47,11 +49,9 @@ function ValidateCommand(serviceName: string, commandName: string): boolean {
 
 function PrintErrorMessage(serviceName: string, commandName: string): void {
   const message = ValidateService(serviceName) ? 'Invalid command ' + commandName : 'Invalid service ' + serviceName;
-  console.log('\x1b[31m');
-  console.log('###########################');
-  console.log(message);
-  console.log('###########################', '\n');
-  console.log('\x1b[0m');
+  error('###########################');
+  error(message);
+  error('###########################', '\n');
 }
 
 export function IsValid(argv: any): boolean {
