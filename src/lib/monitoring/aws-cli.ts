@@ -115,8 +115,9 @@ export async function getDistributions(
 
   // Check if any alias match for distribution ID
   return DistributionList.Items.filter(d => {
-    const aliases = d.Aliases.Items.filter(a => match(a, include, exclude));
-    return match(d.Id, include, exclude) || aliases.length !== 0;
+    const aliases = d.Aliases?.Items || [];
+    const filtered = aliases.filter(a => match(a, include, exclude));
+    return match(d.Id, include, exclude) || filtered.length !== 0;
   });
 }
 
