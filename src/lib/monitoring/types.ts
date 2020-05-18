@@ -87,6 +87,7 @@ export interface ListDistributionResponse {
 export interface Args {
   config: string;
   profile: string;
+  stage: string;
   output?: string;
   service: string[];
   include: string[];

@@ -40,6 +40,12 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
         default: false,
         type: 'boolean',
       },
+      t: {
+        alias: 'stage',
+        describe: 'Stage of the deployment',
+        type: 'string',
+        default: 'dev',
+      },
       interactive: {
         default: false,
         type: 'boolean',
@@ -49,6 +55,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
   const aws = await monitoring.getAllFromAWS(args);
+  console.log(args.include);
 
   if (args.dry) {
     monitoring.logAWS(aws);
