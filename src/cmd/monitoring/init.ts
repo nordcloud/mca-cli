@@ -55,7 +55,6 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
   const aws = await monitoring.getAllFromAWS(args);
-  console.log(args.include);
 
   if (args.dry) {
     monitoring.logAWS(aws);
