@@ -6,8 +6,8 @@ import { Args, AWSItem } from './types';
 import { ConfigGenerator } from './config';
 import { highlight } from '../logger';
 
-export const generatePath = (profile: string): string => {
-  return path.join(process.cwd(), `${profile}-monitoring`);
+export const generatePath = (profile: string, stage: string): string => {
+  return path.join(process.cwd(), `${profile}-monitoring-${stage}`);
 };
 
 export const getTemplateFiles = async (folder: string): Promise<string[]> => {
@@ -83,7 +83,7 @@ export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string)
 };
 
 export const generateMonitoring = async (aws: AWSItem, args: Args): Promise<void> => {
-  const outputPath = args.output ? path.resolve(args.output) : generatePath(args.profile);
+  const outputPath = args.output ? path.resolve(args.output) : generatePath(args.profile, args.stage);
 
   await fs.mkdir(outputPath, { recursive: true });
 

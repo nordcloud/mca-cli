@@ -11,7 +11,7 @@ mca.loadConfig(path.join(__dirname, 'config.yml'));
 const app = mca.createApp();
 
 // Setup default monitoring stack with SNS topics (optional)
-const stack = mca.setupMonitoringStack(app, '{{ profile }}-monitoring');
+const stack = mca.setupMonitoringStack(app, '{{ profile }}-monitoring-{{ stage }}');
 
 // Add Lambda monitoring (optional)
 stack.addDefaultLambdaMonitoring();

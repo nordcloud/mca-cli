@@ -40,6 +40,12 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
         default: false,
         type: 'boolean',
       },
+      t: {
+        alias: 'stage',
+        describe: 'Stage of the deployment',
+        type: 'string',
+        default: 'dev',
+      },
       interactive: {
         default: false,
         type: 'boolean',

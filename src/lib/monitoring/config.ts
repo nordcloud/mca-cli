@@ -22,7 +22,7 @@ export class ConfigGenerator {
         default: {},
         snsTopic: {
           name: 'Topic for mca monitoring alarms',
-          id: `${args.profile}-alerts-alarm`,
+          id: `${args.profile}-alerts-alarm-${args.stage}`,
           endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
           emails: [],
         },
@@ -74,7 +74,7 @@ export class ConfigGenerator {
    * Update CLI args
    */
   public updateCLIArgs(args: Args): void {
-    const { profile, service, include, exclude } = args;
+    const { profile, service, include, exclude, stage } = args;
 
     // Initially generated config might have undefined sns topic
     if (this.config.custom.snsTopic.id.search('undefined') !== -1) {
@@ -84,7 +84,7 @@ export class ConfigGenerator {
           ...this.config.custom,
           snsTopic: {
             ...this.config.custom.snsTopic,
-            id: `${profile}-alerts-alarm`,
+            id: `${profile}-alerts-${stage}-alarm`,
           },
         },
       };
