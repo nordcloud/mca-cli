@@ -15,4 +15,19 @@ test('generate config', t => {
   };
   const conf = new config.ConfigGenerator(args);
   t.is(conf.getConfig().cli.version, 1);
+  t.is(conf.getConfig().cli.profile, 'test');
+});
+
+test('generate config without profile or region', t => {
+  const args = {
+    config: 'test',
+    service: ['lambda'],
+    stage: 'dev',
+    include: [],
+    exclude: [],
+    dry: true,
+  };
+  const conf = new config.ConfigGenerator(args);
+  t.is(conf.getConfig().cli.version, 1);
+  t.is(conf.getConfig().cli.profile, undefined);
 });

@@ -13,7 +13,6 @@ export class ConfigGenerator {
     this.config = {
       cli: {
         version: 1,
-        profile,
         services: service,
         includes: include,
         excludes: exclude,
@@ -28,6 +27,10 @@ export class ConfigGenerator {
         },
       },
     };
+
+    if (profile) {
+      this.config.cli.profile = profile;
+    }
   }
 
   /**

@@ -13,8 +13,9 @@ function match(str: string, include: string[], exclude: string[]): boolean {
 async function runServiceCommand(
   service: string,
   command: string,
-  profile: string,
-  region: string,
+  profile?: string,
+  region?: string,
+  optionals?: string[],
 ): Promise<ExecResponse> {
   const options = [];
 
@@ -26,14 +27,18 @@ async function runServiceCommand(
   }
   options.push(service, command);
 
+  if (optionals) {
+    options.push(optionals.join(' '));
+  }
+
   return await exec('aws', options);
 }
 
 export async function getFunctions(
-  profile: string,
   include: string[],
   exclude: string[],
-  region: string,
+  profile?: string,
+  region?: string,
 ): Promise<types.FunctionItem[]> {
   const { stdout, stderr } = await runServiceCommand('lambda', 'list-functions', profile, region);
   if (stderr !== '') {
@@ -47,10 +52,10 @@ export async function getFunctions(
 }
 
 export async function getTables(
-  profile: string,
   include: string[],
   exclude: string[],
-  region: string,
+  profile?: string,
+  region?: string,
 ): Promise<types.TableItem[]> {
   const { stdout, stderr } = await runServiceCommand('dynamodb', 'list-tables', profile, region);
   if (stderr !== '') {
@@ -80,10 +85,10 @@ export async function getTables(
 }
 
 export async function getClusters(
-  profile: string,
   include: string[],
   exclude: string[],
-  region: string,
+  profile?: string,
+  region?: string,
 ): Promise<types.ClusterItem[]> {
   const { stdout, stderr } = await runServiceCommand('ecs', 'list-clusters', profile, region);
   if (stderr !== '') {
@@ -96,11 +101,7 @@ export async function getClusters(
 
   const clusters = await Promise.all(
     clusterArns.map(async (arn: string) => {
-      const { stdout, stderr } = await exec('aws', [
-        '--profile',
-        profile,
-        'ecs',
-        'describe-clusters',
+      const { stdout, stderr } = await runServiceCommand('ecs', 'describe-clusters', profile, region, [
         '--clusters',
         arn,
       ]);
@@ -119,10 +120,10 @@ export async function getClusters(
 }
 
 export async function getRoutes(
-  profile: string,
   include: string[],
   exclude: string[],
-  region: string,
+  profile?: string,
+  region?: string,
 ): Promise<types.RouteItem[]> {
   const { stdout, stderr } = await runServiceCommand('apigateway', 'get-rest-apis', profile, region);
   if (stderr !== '') {
@@ -137,10 +138,10 @@ export async function getRoutes(
 }
 
 export async function getDistributions(
-  profile: string,
   include: string[],
   exclude: string[],
-  region: string,
+  profile?: string,
+  region?: string,
 ): Promise<types.DistributionItem[]> {
   const { stdout, stderr } = await runServiceCommand('cloudfront', 'list-distributions', profile, region);
   if (stderr !== '') {
@@ -161,11 +162,11 @@ export async function getDistributions(
 
 export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
   const { profile, service, include, exclude, region } = args;
-  const functions = service.indexOf('lambda') !== -1 ? await getFunctions(profile, include, exclude, region) : [];
-  const tables = service.indexOf('dynamodb') !== -1 ? await getTables(profile, include, exclude, region) : [];
-  const clusters = service.indexOf('ecs') !== -1 ? await getClusters(profile, include, exclude, region) : [];
-  const routes = service.indexOf('apigateway') !== -1 ? await getRoutes(profile, include, exclude, region) : [];
-  const distributions = service.indexOf('cloudfront') !== -1 ? await getDistributions(profile, include, exclude, region) : [];
+  const functions = service.indexOf('lambda') !== -1 ? await getFunctions(include, exclude, profile, region) : [];
+  const tables = service.indexOf('dynamodb') !== -1 ? await getTables(include, exclude, profile, region) : [];
+  const clusters = service.indexOf('ecs') !== -1 ? await getClusters(include, exclude, profile, region) : [];
+  const routes = service.indexOf('apigateway') !== -1 ? await getRoutes(include, exclude, profile, region) : [];
+  const distributions = service.indexOf('cloudfront') !== -1 ? await getDistributions(include, exclude, profile, region) : [];
 
   return {
     functions,
