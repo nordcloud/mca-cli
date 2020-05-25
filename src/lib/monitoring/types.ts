@@ -92,6 +92,7 @@ export interface Args {
   service: string[];
   include: string[];
   exclude: string[];
+  region: string;
   dry: boolean;
 }
 
