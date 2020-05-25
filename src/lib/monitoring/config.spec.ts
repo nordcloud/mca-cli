@@ -7,6 +7,7 @@ test('generate config', t => {
     config: 'test',
     profile: 'test',
     service: ['lambda'],
+    region: 'my-home-region',
     stage: 'dev',
     include: [],
     exclude: [],
