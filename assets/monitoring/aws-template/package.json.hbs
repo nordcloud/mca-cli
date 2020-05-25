@@ -1,5 +1,5 @@
 {
-  "name": "{{ profile }}-monitoring-{{ stage }}",
+  "name": "{{#if profile}}{{ profile }}-{{/if}}monitoring{{#if stage}}-{{ stage }}{{/if}}",
   "version": "1.0.0",
   "scripts": {
     "lint": "eslint . --ext ts",
@@ -8,9 +8,9 @@
     "watch": "tsc -w",
     "synth": "cdk synth",
     "version": "cdk --version",
-    "bootstrap": "cdk --profile {{ profile }} bootstrap",
-    "diff": "cdk --profile {{ profile }} diff",
-    "deploy": "cdk --profile {{ profile }} deploy"
+    "bootstrap": "cdk {{#if profile}}--profile {{ profile }} {{/if}}bootstrap",
+    "diff": "cdk {{#if profile}}--profile {{ profile }} {{/if}}diff",
+    "deploy": "cdk {{#if profile}}--profile {{ profile }} {{/if}}deploy"
   },
   "devDependencies": {
     "@types/node": "10.17.5",

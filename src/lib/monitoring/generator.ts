@@ -7,7 +7,18 @@ import { ConfigGenerator } from './config';
 import { highlight } from '../logger';
 
 export const generatePath = (profile: string, stage: string): string => {
-  return path.join(process.cwd(), `${profile}-monitoring-${stage}`);
+  const folderNameArray = [];
+  if (profile) {
+    folderNameArray.push(profile);
+  }
+
+  folderNameArray.push('monitoring');
+
+  if (stage) {
+    folderNameArray.push(stage);
+  }
+
+  return path.join(process.cwd(), folderNameArray.join('-'));
 };
 
 export const getTemplateFiles = async (folder: string): Promise<string[]> => {
