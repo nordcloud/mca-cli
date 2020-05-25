@@ -166,7 +166,8 @@ export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
   const tables = service.indexOf('dynamodb') !== -1 ? await getTables(include, exclude, profile, region) : [];
   const clusters = service.indexOf('ecs') !== -1 ? await getClusters(include, exclude, profile, region) : [];
   const routes = service.indexOf('apigateway') !== -1 ? await getRoutes(include, exclude, profile, region) : [];
-  const distributions = service.indexOf('cloudfront') !== -1 ? await getDistributions(include, exclude, profile, region) : [];
+  const distributions =
+    service.indexOf('cloudfront') !== -1 ? await getDistributions(include, exclude, profile, region) : [];
 
   return {
     functions,
