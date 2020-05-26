@@ -17,6 +17,11 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       describe: 'AWS profile used connect to AWS environment',
       type: 'string',
     },
+    r: {
+      alias: 'region',
+      describe: 'Target region',
+      type: 'string',
+    },
     i: {
       alias: 'include',
       describe: 'List of included names',

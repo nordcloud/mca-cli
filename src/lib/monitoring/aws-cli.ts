@@ -3,17 +3,44 @@ import { isMatch } from 'micromatch';
 import { error } from '../logger';
 import * as types from './types';
 import exec from '../exec';
+import { ExecResponse } from '../types';
 
 function match(str: string, include: string[], exclude: string[]): boolean {
   return (include.length === 0 || isMatch(str, include)) && (exclude.length === 0 || !isMatch(str, exclude));
 }
 
+// If profile is given set it as option, otherwise try to use default profile or role
+async function runServiceCommand(
+  service: string,
+  command: string,
+  profile?: string,
+  region?: string,
+  optionals?: string[],
+): Promise<ExecResponse> {
+  const options = [];
+
+  if (profile) {
+    options.push('--profile', profile);
+  }
+  if (region) {
+    options.push('--region', region);
+  }
+  options.push(service, command);
+
+  if (optionals) {
+    options.push(optionals.join(' '));
+  }
+
+  return await exec('aws', options);
+}
+
 export async function getFunctions(
-  profile: string,
   include: string[],
   exclude: string[],
+  profile?: string,
+  region?: string,
 ): Promise<types.FunctionItem[]> {
-  const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'lambda', 'list-functions']);
+  const { stdout, stderr } = await runServiceCommand('lambda', 'list-functions', profile, region);
   if (stderr !== '') {
     error(stderr);
   }
@@ -24,8 +51,13 @@ export async function getFunctions(
   return resp.Functions.filter(f => match(f.FunctionName, include, exclude));
 }
 
-export async function getTables(profile: string, include: string[], exclude: string[]): Promise<types.TableItem[]> {
-  const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'dynamodb', 'list-tables']);
+export async function getTables(
+  include: string[],
+  exclude: string[],
+  profile?: string,
+  region?: string,
+): Promise<types.TableItem[]> {
+  const { stdout, stderr } = await runServiceCommand('dynamodb', 'list-tables', profile, region);
   if (stderr !== '') {
     error(stderr);
   }
@@ -52,8 +84,13 @@ export async function getTables(profile: string, include: string[], exclude: str
   return tables.filter(t => match(t.TableName, include, exclude));
 }
 
-export async function getClusters(profile: string, include: string[], exclude: string[]): Promise<types.ClusterItem[]> {
-  const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'ecs', 'list-clusters']);
+export async function getClusters(
+  include: string[],
+  exclude: string[],
+  profile?: string,
+  region?: string,
+): Promise<types.ClusterItem[]> {
+  const { stdout, stderr } = await runServiceCommand('ecs', 'list-clusters', profile, region);
   if (stderr !== '') {
     error(stderr);
   }
@@ -64,11 +101,7 @@ export async function getClusters(profile: string, include: string[], exclude: s
 
   const clusters = await Promise.all(
     clusterArns.map(async (arn: string) => {
-      const { stdout, stderr } = await exec('aws', [
-        '--profile',
-        profile,
-        'ecs',
-        'describe-clusters',
+      const { stdout, stderr } = await runServiceCommand('ecs', 'describe-clusters', profile, region, [
         '--clusters',
         arn,
       ]);
@@ -86,8 +119,13 @@ export async function getClusters(profile: string, include: string[], exclude: s
   return clusters.reduce((acc, c) => [...acc, ...c], []).filter(t => t && match(t.clusterName, include, exclude));
 }
 
-export async function getRoutes(profile: string, include: string[], exclude: string[]): Promise<types.RouteItem[]> {
-  const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'apigateway', 'get-rest-apis']);
+export async function getRoutes(
+  include: string[],
+  exclude: string[],
+  profile?: string,
+  region?: string,
+): Promise<types.RouteItem[]> {
+  const { stdout, stderr } = await runServiceCommand('apigateway', 'get-rest-apis', profile, region);
   if (stderr !== '') {
     error(stderr);
   }
@@ -100,11 +138,12 @@ export async function getRoutes(profile: string, include: string[], exclude: str
 }
 
 export async function getDistributions(
-  profile: string,
   include: string[],
   exclude: string[],
+  profile?: string,
+  region?: string,
 ): Promise<types.DistributionItem[]> {
-  const { stdout, stderr } = await exec('aws', ['--profile', `${profile}`, 'cloudfront', 'list-distributions']);
+  const { stdout, stderr } = await runServiceCommand('cloudfront', 'list-distributions', profile, region);
   if (stderr !== '') {
     error(stderr);
   }
@@ -122,12 +161,13 @@ export async function getDistributions(
 }
 
 export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
-  const { profile, service, include, exclude } = args;
-  const functions = service.indexOf('lambda') !== -1 ? await getFunctions(profile, include, exclude) : [];
-  const tables = service.indexOf('dynamodb') !== -1 ? await getTables(profile, include, exclude) : [];
-  const clusters = service.indexOf('ecs') !== -1 ? await getClusters(profile, include, exclude) : [];
-  const routes = service.indexOf('apigateway') !== -1 ? await getRoutes(profile, include, exclude) : [];
-  const distributions = service.indexOf('cloudfront') !== -1 ? await getDistributions(profile, include, exclude) : [];
+  const { profile, service, include, exclude, region } = args;
+  const functions = service.indexOf('lambda') !== -1 ? await getFunctions(include, exclude, profile, region) : [];
+  const tables = service.indexOf('dynamodb') !== -1 ? await getTables(include, exclude, profile, region) : [];
+  const clusters = service.indexOf('ecs') !== -1 ? await getClusters(include, exclude, profile, region) : [];
+  const routes = service.indexOf('apigateway') !== -1 ? await getRoutes(include, exclude, profile, region) : [];
+  const distributions =
+    service.indexOf('cloudfront') !== -1 ? await getDistributions(include, exclude, profile, region) : [];
 
   return {
     functions,

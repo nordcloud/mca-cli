@@ -86,12 +86,13 @@ export interface ListDistributionResponse {
 
 export interface Args {
   config: string;
-  profile: string;
+  profile?: string;
   stage: string;
   output?: string;
   service: string[];
   include: string[];
   exclude: string[];
+  region?: string;
   dry: boolean;
 }
 
@@ -100,7 +101,8 @@ export interface Args {
  */
 export interface ConfigCLI {
   version: number;
-  profile: string;
+  profile?: string;
+  region?: string;
   services: string[];
   includes: string[];
   excludes: string[];
