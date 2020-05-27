@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "CLI application for MCA team",
   "author": "Nordcloud Managed Cloud Applications",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "main": "./dist/bin/mca.js",
   "preferGlobal": true,
   "bin": {
