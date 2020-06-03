@@ -49,6 +49,11 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
       default: 'dev',
     },
+    ssm: {
+      alias: 'ssmParamName',
+      describe: 'SSM param name for pagerduty endpoint in target AWS account',
+      type: 'string',
+    },
     interactive: {
       default: false,
       type: 'boolean',
@@ -58,6 +63,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
   const config = new monitoring.ConfigGenerator(args);
+  config.setPagerDutyEndpoint(args);
   await config.loadFromFile(args.config);
   const combinedArgs = config.combineCLIArgs(args);
   config.updateCLIArgs(combinedArgs);
@@ -65,6 +71,8 @@ export const handler = async (args: monitoring.Args): Promise<void> => {
   const aws = await monitoring.getAllFromAWS(combinedArgs);
 
   const newConfig = new monitoring.ConfigGenerator(combinedArgs);
+  newConfig.setPagerDutyEndpoint(args);
+
   newConfig.addAllLocal(aws);
 
   config.combine(newConfig);

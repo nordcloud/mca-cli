@@ -51,7 +51,17 @@ export class ConfigGenerator {
         ssmParam,
         '--with-decryption',
       ]);
-      this.config.custom.snsTopic.endpoints?.push(JSON.parse(response.stdout).Parameter.Value);
+      const paramValue = JSON.parse(response.stdout).Parameter.Value;
+      const endpoints = this.config.custom.snsTopic.endpoints;
+
+      if (endpoints) {
+        if (endpoints[0] !== paramValue) {
+          endpoints[0] = paramValue;
+        }
+        if (endpoints.length < 1) {
+          endpoints.push(paramValue);
+        }
+      }
     } catch (err) {
       error('No SSM parameter', ssmParam, 'available!', err);
     }
