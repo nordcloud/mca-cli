@@ -1,5 +1,8 @@
 import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
+import exec from '../exec';
+import { warning, error } from '../logger';
+import { ExecResponse } from '../types';
 
 import { Args, Config, AWSItem, ConfigLocalType, ConfigDefaultType } from './types';
 import diff from './diff';
@@ -22,7 +25,7 @@ export class ConfigGenerator {
         snsTopic: {
           name: 'Topic for mca monitoring alarms',
           id: args.profile ? `${args.profile}-alerts-alarm-${args.stage}` : `alerts-alarm-${args.stage}`,
-          endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
+          endpoints: [],
           emails: [],
         },
       },
@@ -30,6 +33,27 @@ export class ConfigGenerator {
 
     if (profile) {
       this.config.cli.profile = profile;
+    }
+  }
+
+  public async setPagerDutyEndpoint(args: Args): Promise<void> {
+    if (!args.ssmParamName) {
+      warning('No SSM param given, using default', `mca-monitoring-endpoint-${args.stage} to retrieve endpoint`);
+    }
+
+    const ssmParam = args.ssmParamName ? args.ssmParamName : `mca-monitoring-endpoint-${args.stage}`;
+
+    try {
+      const response: ExecResponse = await exec('aws', [
+        'ssm',
+        'get-parameter',
+        '--name',
+        ssmParam,
+        '--with-decryption',
+      ]);
+      this.config.custom.snsTopic.endpoints?.push(JSON.parse(response.stdout).Parameter.Value);
+    } catch (err) {
+      error('No SSM parameter', ssmParam, 'available!', err);
     }
   }
 
