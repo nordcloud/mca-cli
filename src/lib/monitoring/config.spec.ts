@@ -9,7 +9,7 @@ test('generate config', t => {
     service: ['lambda'],
     region: 'my-home-region',
     stage: 'dev',
-    ssmParamName: 'my-test-param-dev',
+    pagerdutySSMParam: 'my-test-param-dev',
     include: [],
     exclude: [],
     dry: true,

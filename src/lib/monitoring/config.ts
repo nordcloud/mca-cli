@@ -37,11 +37,11 @@ export class ConfigGenerator {
   }
 
   public async setPagerDutyEndpoint(args: Args): Promise<void> {
-    if (!args.ssmParamName) {
+    if (!args.pagerdutySSMParam) {
       warning('No SSM param given, using default', `mca-monitoring-endpoint-${args.stage} to retrieve endpoint`);
     }
 
-    const ssmParam = args.ssmParamName ? args.ssmParamName : `mca-monitoring-endpoint-${args.stage}`;
+    const ssmParam = args.pagerdutySSMParam ? args.pagerdutySSMParam : `mca-monitoring-endpoint-${args.stage}`;
 
     try {
       const response: ExecResponse = await exec('aws', [

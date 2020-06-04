@@ -93,7 +93,7 @@ export interface Args {
   include: string[];
   exclude: string[];
   region?: string;
-  ssmParamName?: string;
+  pagerdutySSMParam?: string;
   dry: boolean;
 }
 
