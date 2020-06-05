@@ -97,12 +97,15 @@ export class ConfigGenerator {
       ...this.config,
       cli: {
         ...this.config.cli,
-        profile,
         services: service,
         includes: include,
         excludes: exclude,
       },
     };
+
+    if (profile) {
+      this.config.cli.profile = profile;
+    }
   }
 
   /**
