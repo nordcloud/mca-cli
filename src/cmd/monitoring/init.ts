@@ -1,6 +1,7 @@
 import { Argv } from 'yargs';
 
 import { monitoring } from '../../lib';
+import { setVerbose } from '../../lib/logger';
 
 export const command = 'init [options]';
 export const desc = 'Setup monitoring stack';
@@ -51,6 +52,12 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
       default: 'dev',
     },
+    v: {
+      alias: 'verbose',
+      describe: 'Set verbose logging',
+      type: 'boolean',
+      default: false,
+    },
     interactive: {
       default: false,
       type: 'boolean',
@@ -59,6 +66,8 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
+  setVerbose(args.verbose)
+
   const aws = await monitoring.getAllFromAWS(args);
 
   if (args.dry) {
