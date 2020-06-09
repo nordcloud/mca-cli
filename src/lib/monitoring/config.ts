@@ -37,33 +37,39 @@ export class ConfigGenerator {
   }
 
   public async setPagerDutyEndpoint(args: Args): Promise<void> {
-    if (!args.pagerdutySSMParam) {
-      warning('No SSM param given, using default', `mca-monitoring-endpoint-${args.stage} to retrieve endpoint`);
+    if (args.endpoints.length < 1) {
+      warning('No endpoints given!!');
     }
 
-    const ssmParam = args.pagerdutySSMParam ? args.pagerdutySSMParam : `mca-monitoring-endpoint-${args.stage}`;
+    const endpoints = this.config.custom.snsTopic.endpoints;
+    for (const [index, endpoint] of args.endpoints.entries()) {
+      if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
+        // Removes the ssm: at the beginning of string and retrieve SSM param value
+        const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
 
-    try {
-      const response: ExecResponse = await exec('aws', [
-        'ssm',
-        'get-parameter',
-        '--name',
-        ssmParam,
-        '--with-decryption',
-      ]);
-      const paramValue = JSON.parse(response.stdout).Parameter.Value;
-      const endpoints = this.config.custom.snsTopic.endpoints;
+        try {
+          const response: ExecResponse = await exec('aws', [
+            'ssm',
+            'get-parameter',
+            '--name',
+            ssmParam,
+            '--with-decryption',
+          ]);
+          const paramValue = JSON.parse(response.stdout).Parameter.Value;
 
-      if (endpoints) {
-        if (endpoints[0] !== paramValue) {
-          endpoints[0] = paramValue;
+          if (endpoints[index] !== paramValue) {
+            endpoints[index] = paramValue;
+          }
+        } catch (err) {
+          error('No SSM parameter', ssmParam, 'available!', err);
         }
-        if (endpoints.length < 1) {
-          endpoints.push(paramValue);
-        }
+      } else if (endpoints[index] !== endpoint) {
+        // Update existing endpoints
+        endpoints[index] = endpoint;
+      } else if (index >= endpoints.length) {
+        // Add new endpoints
+        endpoints.push(endpoint);
       }
-    } catch (err) {
-      error('No SSM parameter', ssmParam, 'available!', err);
     }
   }
 

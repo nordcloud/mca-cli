@@ -51,10 +51,12 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
       default: 'dev',
     },
-    pd: {
-      alias: 'pagerdutySSMParam',
-      describe: 'SSM param name for pagerduty endpoint in target AWS account',
-      type: 'string',
+    ep: {
+      alias: 'endpoints',
+      default: [],
+      describe:
+        'Add endpoints directly or AWS SSM params name to retrieve endpoints from SSM, e.g. ssm:my-endpoint-${stage}, stage is always added to the end',
+      type: 'array',
     },
     interactive: {
       default: false,

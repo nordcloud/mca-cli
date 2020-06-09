@@ -49,10 +49,12 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
       default: 'dev',
     },
-    pd: {
-      alias: 'pagerdutySSMParam',
-      describe: 'SSM param name for pagerduty endpoint in target AWS account',
-      type: 'string',
+    ep: {
+      alias: 'endpoints',
+      default: [],
+      describe:
+        'Add endpoints directly or AWS SSM params name to retrieve endpoints from SSM, e.g. ssm:my-endpoint-${stage}, stage is always added to the end',
+      type: 'array',
     },
     interactive: {
       default: false,
@@ -62,6 +64,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
+  console.log('ARGS', args);
   const config = new monitoring.ConfigGenerator(args);
   await config.loadFromFile(args.config);
   await config.setPagerDutyEndpoint(args);
