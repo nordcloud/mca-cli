@@ -49,6 +49,13 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
       default: 'dev',
     },
+    ep: {
+      alias: 'endpoints',
+      default: [],
+      describe:
+        'Add endpoints directly or AWS SSM params name to retrieve endpoints from SSM, e.g. ssm:my-endpoint-${stage}, stage is always added to the end',
+      type: 'array',
+    },
     interactive: {
       default: false,
       type: 'boolean',
@@ -59,12 +66,14 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 export const handler = async (args: monitoring.Args): Promise<void> => {
   const config = new monitoring.ConfigGenerator(args);
   await config.loadFromFile(args.config);
+  await config.setPagerDutyEndpoint(args);
   const combinedArgs = config.combineCLIArgs(args);
   config.updateCLIArgs(combinedArgs);
 
   const aws = await monitoring.getAllFromAWS(combinedArgs);
 
   const newConfig = new monitoring.ConfigGenerator(combinedArgs);
+
   newConfig.addAllLocal(aws);
 
   config.combine(newConfig);

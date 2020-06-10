@@ -62,6 +62,7 @@ const generateTemplate = async (
 const generateConfig = async (aws: AWSItem, args: Args, outputPath: string): Promise<void> => {
   const filePath = path.join(outputPath, 'config.yml');
   const config = new ConfigGenerator(args);
+  await config.setPagerDutyEndpoint(args);
   config.addAllLocal(aws);
   await config.write(filePath);
 };
