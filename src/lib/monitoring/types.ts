@@ -1,87 +1,9 @@
-export interface FunctionItem {
-  FunctionName: string;
-  FunctionArn: string;
-}
-
-export interface TableItem {
-  TableName: string;
-  TableArn: string;
-}
-
-export interface ClusterItem {
-  status: string;
-  clusterName: string;
-  registeredContainerInstancesCount: number;
-  pendingTasksCount: number;
-  runningTasksCount: number;
-  activeServicesCount: number;
-  clusterArn: string;
-}
-
-export interface RouteItemEndpoint {
-  types: string[];
-}
-
-export interface RouteItem {
-  id: string;
-  name: string;
-  createdDate: number;
-  apiKeySource: string;
-  endpointConfiguration: RouteItemEndpoint;
-}
-
-export interface DistributionAliases {
-  Quantatity: number;
-  Items: string[];
-}
-export interface DistributionItem {
-  Id: string;
-  ARN: string;
-  Status: string;
-  LastModifiedTime: string;
-  InProgressInvalidationBatches: number;
-  DomainName: string;
-  Aliases: DistributionAliases;
-}
-
 export interface AWSItem {
-  functions: FunctionItem[];
-  tables: TableItem[];
-  clusters: ClusterItem[];
-  routes: RouteItem[];
-  distributions: DistributionItem[];
-}
-
-export interface ListFunctionResponse {
-  Functions: FunctionItem[];
-}
-
-export interface ListTableResponse {
-  TableNames: string[];
-}
-
-export interface DescribeTableResponse {
-  Table: TableItem;
-}
-
-export interface ListClusterResponse {
-  clusterArns: string[];
-}
-
-export interface DescribeClusterResponse {
-  clusters: ClusterItem[];
-}
-
-export interface ListRouteResponse {
-  items: RouteItem[];
-}
-
-export interface DistributionList {
-  Quantity: number;
-  Items: DistributionItem[];
-}
-export interface ListDistributionResponse {
-  DistributionList: DistributionList;
+  functions: AWS.Lambda.FunctionList,
+  tables: AWS.DynamoDB.TableNameList;
+  clusters: AWS.ECS.Clusters;
+  routes: AWS.APIGateway.RestApi[];
+  distributions: AWS.CloudFront.DistributionSummary[];
 }
 
 export interface Args {
@@ -94,6 +16,7 @@ export interface Args {
   exclude: string[];
   region?: string;
   dry: boolean;
+  verbose: boolean;
 }
 
 /**

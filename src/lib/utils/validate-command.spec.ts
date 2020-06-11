@@ -1,5 +1,5 @@
 import test from 'ava';
-import { IsValid } from './validate-command';
+import IsValid from './validate-command';
 
 const args1: any = {
   _: ['monitoring'],

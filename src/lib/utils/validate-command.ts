@@ -54,7 +54,7 @@ function PrintErrorMessage(serviceName: string, commandName: string): void {
   error('###########################', '\n');
 }
 
-export function IsValid(argv: any): boolean {
+export default function IsValid(argv: any): boolean {
   const service: string = argv._[0];
   const command: string = argv.command ? argv.command : argv._[argv._.length - 1];
   let isValid = true;

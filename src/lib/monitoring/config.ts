@@ -1,7 +1,7 @@
 import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
 
-import { Args, Config, AWSItem, ConfigLocalType, ConfigDefaultType } from './types';
+import { Args, Config, AWSItem, ConfigLocals, ConfigLocalType, ConfigDefaultType } from './types';
 import diff from './diff';
 
 export class ConfigGenerator {
@@ -251,7 +251,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: {} }), {}),
+      lambdas: aws.functions.reduce((acc: Con, f) => ({ ...acc, [f.FunctionName || '']: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {
@@ -337,7 +337,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t.TableName]: {} }), {}),
+      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t]: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {
@@ -408,7 +408,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName]: {} }), {}),
+      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName || '']: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {
@@ -468,7 +468,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      routes: routes.reduce((acc, r) => ({ ...acc, [r.name]: {} }), {}),
+      routes: routes.reduce((acc, r) => ({ ...acc, [r.name || '']: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {

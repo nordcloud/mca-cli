@@ -76,7 +76,7 @@ export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string)
   });
   highlight('Tables:', aws.tables.length);
   aws.tables.forEach(t => {
-    highlight('  -', t.TableName);
+    highlight('  -', t);
   });
   highlight('Clusters:', aws.clusters.length);
   aws.clusters.forEach(t => {
