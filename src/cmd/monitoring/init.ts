@@ -52,6 +52,13 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
       default: 'dev',
     },
+    ep: {
+      alias: 'endpoints',
+      default: [],
+      describe:
+        'Add endpoints directly or AWS SSM params name to retrieve endpoints from SSM, e.g. ssm:my-endpoint-${stage}, stage is always added to the end',
+      type: 'array',
+    },
     v: {
       alias: 'verbose',
       describe: 'Set verbose logging',

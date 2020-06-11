@@ -1,5 +1,8 @@
 import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
+import exec from '../exec';
+import { warning, error } from '../logger';
+import { ExecResponse } from '../types';
 
 import { Args, Config, AWSItem, ConfigLocals, ConfigLocalType, ConfigDefaultType } from './types';
 import diff from './diff';
@@ -22,7 +25,7 @@ export class ConfigGenerator {
         snsTopic: {
           name: 'Topic for mca monitoring alarms',
           id: args.profile ? `${args.profile}-alerts-alarm-${args.stage}` : `alerts-alarm-${args.stage}`,
-          endpoints: ['https://events.pagerduty.com/integration/<INTEGRATION ID>/enqueue'],
+          endpoints: [],
           emails: [],
         },
       },
@@ -30,6 +33,43 @@ export class ConfigGenerator {
 
     if (profile) {
       this.config.cli.profile = profile;
+    }
+  }
+
+  public async setPagerDutyEndpoint(args: Args): Promise<void> {
+    if (args.endpoints.length < 1) {
+      warning('No endpoints given!!');
+    }
+
+    const endpoints = this.config.custom.snsTopic.endpoints;
+    for (const [index, endpoint] of args.endpoints.entries()) {
+      if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
+        // Removes the ssm: at the beginning of string and retrieve SSM param value
+        const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
+
+        try {
+          const response: ExecResponse = await exec('aws', [
+            'ssm',
+            'get-parameter',
+            '--name',
+            ssmParam,
+            '--with-decryption',
+          ]);
+          const paramValue = JSON.parse(response.stdout).Parameter.Value;
+
+          if (endpoints[index] !== paramValue) {
+            endpoints[index] = paramValue;
+          }
+        } catch (err) {
+          error('No SSM parameter', ssmParam, 'available!', err);
+        }
+      } else if (endpoints[index] !== endpoint) {
+        // Update existing endpoints
+        endpoints[index] = endpoint;
+      } else if (index >= endpoints.length) {
+        // Add new endpoints
+        endpoints.push(endpoint);
+      }
     }
   }
 
@@ -97,12 +137,15 @@ export class ConfigGenerator {
       ...this.config,
       cli: {
         ...this.config.cli,
-        profile,
         services: service,
         includes: include,
         excludes: exclude,
       },
     };
+
+    if (profile) {
+      this.config.cli.profile = profile;
+    }
   }
 
   /**

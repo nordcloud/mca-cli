@@ -14,6 +14,7 @@ export interface Args {
   service: string[];
   include: string[];
   exclude: string[];
+  endpoints: string[];
   region?: string;
   dry: boolean;
   verbose: boolean;
@@ -162,7 +163,7 @@ export interface ConfigCustomSNS {
   id: string;
   name: string;
   emails?: string[];
-  endpoints?: string[];
+  endpoints: string[];
 }
 
 export interface ConfigCustom {
