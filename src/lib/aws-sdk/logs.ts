@@ -12,7 +12,7 @@ export async function getLogGroups(): Promise<AWS.CloudWatchLogs.LogGroup[]> {
   const res = await logs.describeLogGroups().promise();
   debug('Log group describe result:', res)
 
-  return res.logGroups
+  return res.logGroups || []
 }
 
 export async function setLogGroupRetention(logGroupName: string, retentionInDays: number): Promise<void> {

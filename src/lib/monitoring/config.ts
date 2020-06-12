@@ -286,7 +286,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      lambdas: aws.functions.reduce((acc: Con, f) => ({ ...acc, [f.FunctionName || '']: {} }), {} as ConfigLocals),
+      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName || '']: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {

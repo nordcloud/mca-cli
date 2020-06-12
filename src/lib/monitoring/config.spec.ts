@@ -45,6 +45,7 @@ test('add endpoint', t => {
     include: [],
     exclude: [],
     dry: true,
+    verbose: false,
   };
   const conf = new config.ConfigGenerator(args);
   conf.setPagerDutyEndpoint(args);
