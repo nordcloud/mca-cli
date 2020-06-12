@@ -28,42 +28,27 @@ async function tokenCodeFn(serialArn: string, cb: (err?: Error, token?: string) 
   }
 }
 
-export async function setAWSCredentials(profile?: string, region?: string) {
-  const sources = [
-    () => new AWS.EnvironmentCredentials('AWS'),
-    () => new AWS.EnvironmentCredentials('AMAZON'),
-  ]
-
-  profile = profile || process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || 'default';
-
-  sources.push(() => new AWS.SharedIniFileCredentials({ profile, tokenCodeFn }))
-
-  const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();
-  AWS.config.update({ credentials })
-
-  // If region is defined, then set that up as well
-  if (region) {
-    await setAWSRegion(profile, region);
-  }
+function homeDir(): string {
+  return (
+    process.env.HOME ||
+    process.env.USERPROFILE ||
+    (process.env.HOMEPATH ? (process.env.HOMEDRIVE || 'C:/') + process.env.HOMEPATH : null) ||
+    os.homedir()
+  );
 }
 
-function homeDir() {
-  return process.env.HOME || process.env.USERPROFILE
-    || (process.env.HOMEPATH ? ((process.env.HOMEDRIVE || 'C:/') + process.env.HOMEPATH) : null) || os.homedir();
-}
-
-function credentialsFileName() {
+function credentialsFileName(): string {
   return process.env.AWS_SHARED_CREDENTIALS_FILE || path.join(homeDir(), '.aws', 'credentials');
 }
 
-function configFileName() {
+function configFileName(): string {
   return process.env.AWS_CONFIG_FILE || path.join(homeDir(), '.aws', 'config');
 }
 
-export async function setAWSRegion(profile?: string, regionCustom?: string) {
+export async function setAWSRegion(profile?: string, regionCustom?: string): Promise<void> {
   if (regionCustom) {
     debug('Setting region to custom:', regionCustom);
-    AWS.config.update({ region: regionCustom })
+    AWS.config.update({ region: regionCustom });
     return;
   }
 
@@ -77,17 +62,22 @@ export async function setAWSRegion(profile?: string, regionCustom?: string) {
     { isConfig: true, filename: configFileName(), profile: 'default' },
   ];
 
-  let region = process.env.AWS_REGION || process.env.AMAZON_REGION ||
-    process.env.AWS_DEFAULT_REGION || process.env.AMAZON_DEFAULT_REGION;
+  let region =
+    process.env.AWS_REGION ||
+    process.env.AMAZON_REGION ||
+    process.env.AWS_DEFAULT_REGION ||
+    process.env.AMAZON_DEFAULT_REGION;
 
   while (!region && toCheck.length > 0) {
-    const options = toCheck.shift()!;
-    if (fs.existsSync(options.filename)) {
+    const options = toCheck.shift();
+    if (options && fs.existsSync(options.filename)) {
       const contents: string = fs.readFileSync(options.filename).toString();
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       const config = (AWS as any).util.ini.parse(contents);
 
-      const profileIndex = profile !== (AWS as any).util.defaultProfile && options.isConfig ?
-        'profile ' + profile : profile;
+      const profileIndex =
+        /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
+        profile !== (AWS as any).util.defaultProfile && options.isConfig ? 'profile ' + profile : profile;
 
       region = config[profileIndex || '']?.region;
     }
@@ -96,9 +86,31 @@ export async function setAWSRegion(profile?: string, regionCustom?: string) {
   if (!region) {
     const usedProfile = !profile ? '' : ` (profile: "${profile}")`;
     region = 'us-east-1'; // This is what the AWS CLI does
-    debug(`Unable to determine AWS region from environment or AWS configuration${usedProfile}, defaulting to '${region}'`);
+    debug(
+      `Unable to determine AWS region from environment or AWS configuration${usedProfile}, defaulting to '${region}'`,
+    );
   }
   debug('Set region to:', region);
 
-  AWS.config.update({ region })
+  AWS.config.update({ region });
+}
+
+function environmentCredentials(prefix: string): () => AWS.EnvironmentCredentials {
+  return (): AWS.EnvironmentCredentials => new AWS.EnvironmentCredentials(prefix);
+}
+
+export async function setAWSCredentials(profile?: string, region?: string): Promise<void> {
+  const sources: (() => AWS.Credentials)[] = [environmentCredentials('AWS'), environmentCredentials('AMAZON')];
+
+  profile = profile || process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || 'default';
+
+  sources.push(() => new AWS.SharedIniFileCredentials({ profile, tokenCodeFn }));
+
+  const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();
+  AWS.config.update({ credentials });
+
+  // If region is defined, then set that up as well
+  if (region) {
+    await setAWSRegion(profile, region);
+  }
 }

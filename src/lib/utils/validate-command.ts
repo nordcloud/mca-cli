@@ -4,8 +4,13 @@ import { error } from '../logger';
 
 const servicePath = path.join(__dirname, '..', '..', 'cmd');
 
-interface Commands {
+export interface Commands {
   [key: string]: Array<string>;
+}
+
+export interface ArgV {
+  _: string[];
+  command?: string;
 }
 
 const commands: Commands = {
@@ -54,7 +59,7 @@ function PrintErrorMessage(serviceName: string, commandName: string): void {
   error('###########################', '\n');
 }
 
-export default function IsValid(argv: any): boolean {
+export default function IsValid(argv: ArgV): boolean {
   const service: string = argv._[0];
   const command: string = argv.command ? argv.command : argv._[argv._.length - 1];
   let isValid = true;

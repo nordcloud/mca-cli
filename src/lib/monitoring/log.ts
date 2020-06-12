@@ -62,7 +62,7 @@ function listDistributions({ distributions }: AWSItem): void {
   highlight('Cloudfront ditributions:');
   distributions.forEach(d => {
     highlight('  - ', d.Id);
-    const items = d.Aliases?.Items || []
+    const items = d.Aliases?.Items || [];
     if (items.length !== 0) {
       highlight('    aliases:');
       items.forEach(a => {

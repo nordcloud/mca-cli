@@ -73,7 +73,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
-  setVerbose(args.verbose)
+  setVerbose(args.verbose);
 
   const aws = await monitoring.getAllFromAWS(args);
 

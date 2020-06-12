@@ -71,7 +71,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
-  setVerbose(args.verbose)
+  setVerbose(args.verbose);
 
   const config = new monitoring.ConfigGenerator(args);
   await config.loadFromFile(args.config);

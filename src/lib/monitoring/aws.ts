@@ -9,8 +9,7 @@ export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
   const tables = service.indexOf('dynamodb') !== -1 ? await aws.getTables(include, exclude) : [];
   const clusters = service.indexOf('ecs') !== -1 ? await aws.getClusters(include, exclude) : [];
   const routes = service.indexOf('apigateway') !== -1 ? await aws.getRoutes(include, exclude) : [];
-  const distributions =
-    service.indexOf('cloudfront') !== -1 ? await aws.getDistributions(include, exclude) : [];
+  const distributions = service.indexOf('cloudfront') !== -1 ? await aws.getDistributions(include, exclude) : [];
 
   return {
     functions,

@@ -1,5 +1,5 @@
 export interface AWSItem {
-  functions: AWS.Lambda.FunctionList,
+  functions: AWS.Lambda.FunctionList;
   tables: AWS.DynamoDB.TableNameList;
   clusters: AWS.ECS.Clusters;
   routes: AWS.APIGateway.RestApi[];

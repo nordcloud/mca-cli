@@ -10,9 +10,7 @@ export async function SetRetentions(args: CmdParams): Promise<void> {
 
   const logGroups = await getLogGroups();
 
-  const logGroupNames = logGroups
-    .map((group) => group.logGroupName)
-    .filter((group) => group) as string[]
+  const logGroupNames = logGroups.map(group => group.logGroupName).filter(group => group) as string[];
 
   // Only update prefix matching log groups
   logGroupNames.forEach(logGroupName => {
