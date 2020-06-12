@@ -4,7 +4,7 @@ import { debug } from '../logger';
 import { match } from '../utils';
 
 export async function getRoutes(include: string[], exclude: string[]): Promise<AWS.APIGateway.RestApi[]> {
-  validateCredentials()
+  validateCredentials();
 
   const gateway = new AWS.APIGateway();
 

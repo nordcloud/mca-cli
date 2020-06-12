@@ -136,7 +136,7 @@ export async function setAWSCredentials(profile?: string, region?: string): Prom
 /**
  * Throws error if credentials are missing
  */
-export function validateCredentials() {
+export function validateCredentials(): void {
   if (!AWS.config.credentials) {
     throw new Error('AWS credentials not set');
   }

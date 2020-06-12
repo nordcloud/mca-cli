@@ -4,7 +4,7 @@ import { debug } from '../logger';
 import { match } from '../utils';
 
 export async function getLambdas(include: string[], exclude: string[]): Promise<AWS.Lambda.FunctionList> {
-  validateCredentials()
+  validateCredentials();
 
   const lambda = new AWS.Lambda();
 

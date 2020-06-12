@@ -3,7 +3,7 @@ import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 
 export async function getSSMParameter(name: string, withDecryption = false): Promise<string | undefined> {
-  validateCredentials()
+  validateCredentials();
 
   const ssm = new AWS.SSM();
 

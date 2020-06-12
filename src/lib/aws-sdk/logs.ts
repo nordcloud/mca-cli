@@ -3,7 +3,7 @@ import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 
 export async function getLogGroups(): Promise<AWS.CloudWatchLogs.LogGroup[]> {
-  validateCredentials()
+  validateCredentials();
 
   const logs = new AWS.CloudWatchLogs();
 
@@ -15,7 +15,7 @@ export async function getLogGroups(): Promise<AWS.CloudWatchLogs.LogGroup[]> {
 }
 
 export async function setLogGroupRetention(logGroupName: string, retentionInDays: number): Promise<void> {
-  validateCredentials()
+  validateCredentials();
 
   const logs = new AWS.CloudWatchLogs();
 

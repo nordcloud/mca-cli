@@ -4,7 +4,7 @@ import { debug } from '../logger';
 import { match } from '../utils';
 
 export async function getTables(include: string[], exclude: string[]): Promise<AWS.DynamoDB.TableNameList> {
-  validateCredentials()
+  validateCredentials();
 
   const dynamodb = new AWS.DynamoDB();
 

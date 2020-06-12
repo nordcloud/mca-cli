@@ -7,7 +7,7 @@ export async function getDistributions(
   include: string[],
   exclude: string[],
 ): Promise<AWS.CloudFront.DistributionSummary[]> {
-  validateCredentials()
+  validateCredentials();
 
   const cf = new AWS.CloudFront();
 

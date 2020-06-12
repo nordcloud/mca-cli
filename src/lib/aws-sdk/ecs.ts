@@ -4,7 +4,7 @@ import { debug } from '../logger';
 import { match, chunk } from '../utils';
 
 export async function getClusters(include: string[], exclude: string[]): Promise<AWS.ECS.Clusters> {
-  validateCredentials()
+  validateCredentials();
 
   const ecs = new AWS.ECS();
 
