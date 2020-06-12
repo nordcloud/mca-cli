@@ -1,21 +1,21 @@
 import test from 'ava';
-import { IsValid } from './validate-command';
+import IsValid, { ArgV } from './validate-command';
 
-const args1: any = {
+const args1: ArgV = {
   _: ['monitoring'],
   command: 'init',
 };
 
-const args2: any = {
+const args2: ArgV = {
   _: ['monitoring', 'init'],
 };
 
-const args3: any = {
+const args3: ArgV = {
   _: ['monitorin'],
   command: 'init',
 };
 
-const args4: any = {
+const args4: ArgV = {
   _: ['monitoring', 'initi'],
 };
 

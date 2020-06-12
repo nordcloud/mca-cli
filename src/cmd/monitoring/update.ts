@@ -1,6 +1,7 @@
 import { Argv } from 'yargs';
 
 import { monitoring } from '../../lib';
+import { setVerbose } from '../../lib/logger';
 
 export const command = 'update [options]';
 export const desc = 'Update monitoring config';
@@ -56,6 +57,12 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
         'Add endpoints directly or AWS SSM params name to retrieve endpoints from SSM, e.g. ssm:my-endpoint-${stage}, stage is always added to the end',
       type: 'array',
     },
+    v: {
+      alias: 'verbose',
+      describe: 'Set verbose logging',
+      type: 'boolean',
+      default: false,
+    },
     interactive: {
       default: false,
       type: 'boolean',
@@ -64,6 +71,8 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
+  setVerbose(args.verbose);
+
   const config = new monitoring.ConfigGenerator(args);
   await config.loadFromFile(args.config);
   await config.setPagerDutyEndpoint(args);

@@ -1,10 +1,9 @@
 import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
-import exec from '../exec';
+import { getSSMParameter } from '../aws-sdk';
 import { warning, error } from '../logger';
-import { ExecResponse } from '../types';
 
-import { Args, Config, AWSItem, ConfigLocalType, ConfigDefaultType } from './types';
+import { Args, Config, AWSItem, ConfigLocals, ConfigLocalType, ConfigDefaultType } from './types';
 import diff from './diff';
 
 export class ConfigGenerator {
@@ -46,18 +45,11 @@ export class ConfigGenerator {
       if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
         // Removes the ssm: at the beginning of string and retrieve SSM param value
         const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
-
         try {
-          const response: ExecResponse = await exec('aws', [
-            'ssm',
-            'get-parameter',
-            '--name',
-            ssmParam,
-            '--with-decryption',
-          ]);
-          const paramValue = JSON.parse(response.stdout).Parameter.Value;
-
-          if (endpoints[index] !== paramValue) {
+          const paramValue = await getSSMParameter(ssmParam, true);
+          if (!paramValue) {
+            error('No SSM parameter', ssmParam, 'available!');
+          } else if (endpoints[index] !== paramValue) {
             endpoints[index] = paramValue;
           }
         } catch (err) {
@@ -294,7 +286,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName]: {} }), {}),
+      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName || '']: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {
@@ -380,7 +372,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t.TableName]: {} }), {}),
+      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t]: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {
@@ -451,7 +443,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName]: {} }), {}),
+      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName || '']: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {
@@ -511,7 +503,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      routes: routes.reduce((acc, r) => ({ ...acc, [r.name]: {} }), {}),
+      routes: routes.reduce((acc, r) => ({ ...acc, [r.name || '']: {} }), {} as ConfigLocals),
       custom: {
         ...this.config.custom,
         default: {

@@ -13,6 +13,7 @@ test('generate config', t => {
     include: [],
     exclude: [],
     dry: true,
+    verbose: false,
   };
   const conf = new config.ConfigGenerator(args);
   t.is(conf.getConfig().cli.version, 1);
@@ -28,6 +29,7 @@ test('generate config without profile or region', t => {
     include: [],
     exclude: [],
     dry: true,
+    verbose: false,
   };
   const conf = new config.ConfigGenerator(args);
   t.is(conf.getConfig().cli.version, 1);
@@ -43,6 +45,7 @@ test('add endpoint', t => {
     include: [],
     exclude: [],
     dry: true,
+    verbose: false,
   };
   const conf = new config.ConfigGenerator(args);
   conf.setPagerDutyEndpoint(args);

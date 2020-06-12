@@ -9,8 +9,7 @@ function listFunctions({ functions }: AWSItem): void {
   highlight('');
   highlight('Lambda Functions:');
   functions.forEach(f => {
-    highlight('  - name:', f.FunctionName);
-    highlight('    arn:', f.FunctionArn);
+    highlight('  -', f.FunctionName);
   });
   highlight('');
 }
@@ -23,8 +22,7 @@ function listTables({ tables }: AWSItem): void {
   highlight('');
   highlight('DynamoDB Tables:');
   tables.forEach(t => {
-    highlight('  - name:', t.TableName);
-    highlight('    arn:', t.TableArn);
+    highlight('  -', t);
   });
   highlight('');
 }
@@ -37,8 +35,7 @@ function listClusters({ clusters }: AWSItem): void {
   highlight('');
   highlight('ECS clusters:');
   clusters.forEach(c => {
-    highlight('  - name:', c.clusterName);
-    highlight('    arn:', c.clusterArn);
+    highlight('  -', c.clusterName);
   });
   highlight('');
 }
@@ -51,7 +48,7 @@ function listRoutes({ routes }: AWSItem): void {
   highlight('');
   highlight('API Gateway routes:');
   routes.forEach(r => {
-    highlight('  - name:', r.name);
+    highlight('  -', r.name);
   });
   highlight('');
 }
@@ -64,11 +61,11 @@ function listDistributions({ distributions }: AWSItem): void {
   highlight('');
   highlight('Cloudfront ditributions:');
   distributions.forEach(d => {
-    highlight('  - name:', d.Id);
-    highlight('    arn:', d.ARN);
-    if (d.Aliases.Items.length !== 0) {
+    highlight('  - ', d.Id);
+    const items = d.Aliases?.Items || [];
+    if (items.length !== 0) {
       highlight('    aliases:');
-      d.Aliases.Items.forEach(a => {
+      items.forEach(a => {
         highlight('      -', a);
       });
     }
