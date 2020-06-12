@@ -28,7 +28,7 @@ async function tokenCodeFn(serialArn: string, cb: (err?: Error, token?: string) 
   }
 }
 
-export async function AWSSetupCredentials(profile?: string) {
+export async function setAWSCredentials(profile?: string, region?: string) {
   const sources = [
     () => new AWS.EnvironmentCredentials('AWS'),
     () => new AWS.EnvironmentCredentials('AMAZON'),
@@ -40,6 +40,11 @@ export async function AWSSetupCredentials(profile?: string) {
 
   const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();
   AWS.config.update({ credentials })
+
+  // If region is defined, then set that up as well
+  if (region) {
+    await setAWSRegion(profile, region);
+  }
 }
 
 function homeDir() {
