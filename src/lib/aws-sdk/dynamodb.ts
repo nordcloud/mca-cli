@@ -1,11 +1,10 @@
 import * as AWS from 'aws-sdk';
+import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 import { match } from '../utils';
 
 export async function getTables(include: string[], exclude: string[]): Promise<AWS.DynamoDB.TableNameList> {
-  if (!AWS.config.credentials) {
-    throw new Error('AWS credentials not set');
-  }
+  validateCredentials()
 
   const dynamodb = new AWS.DynamoDB();
 

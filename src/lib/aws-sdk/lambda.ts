@@ -1,11 +1,10 @@
 import * as AWS from 'aws-sdk';
+import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 import { match } from '../utils';
 
 export async function getLambdas(include: string[], exclude: string[]): Promise<AWS.Lambda.FunctionList> {
-  if (!AWS.config.credentials) {
-    throw new Error('AWS credentials not set');
-  }
+  validateCredentials()
 
   const lambda = new AWS.Lambda();
 

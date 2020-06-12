@@ -1,4 +1,5 @@
 import * as AWS from 'aws-sdk';
+import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 import { match } from '../utils';
 
@@ -6,9 +7,7 @@ export async function getDistributions(
   include: string[],
   exclude: string[],
 ): Promise<AWS.CloudFront.DistributionSummary[]> {
-  if (!AWS.config.credentials) {
-    throw new Error('AWS credentials not set');
-  }
+  validateCredentials()
 
   const cf = new AWS.CloudFront();
 

@@ -1,11 +1,10 @@
 import * as AWS from 'aws-sdk';
+import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 import { match } from '../utils';
 
 export async function getRoutes(include: string[], exclude: string[]): Promise<AWS.APIGateway.RestApi[]> {
-  if (!AWS.config.credentials) {
-    throw new Error('AWS credentials not set');
-  }
+  validateCredentials()
 
   const gateway = new AWS.APIGateway();
 

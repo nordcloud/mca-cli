@@ -28,6 +28,9 @@ async function tokenCodeFn(serialArn: string, cb: (err?: Error, token?: string) 
   }
 }
 
+/**
+ * Get home directory
+ */
 function homeDir(): string {
   return (
     process.env.HOME ||
@@ -37,14 +40,23 @@ function homeDir(): string {
   );
 }
 
+/**
+ * Get path to aws credentials file
+ */
 function credentialsFileName(): string {
   return process.env.AWS_SHARED_CREDENTIALS_FILE || path.join(homeDir(), '.aws', 'credentials');
 }
 
+/**
+ * Get path to aws config file
+ */
 function configFileName(): string {
   return process.env.AWS_CONFIG_FILE || path.join(homeDir(), '.aws', 'config');
 }
 
+/**
+ * Set AWS region
+ */
 export async function setAWSRegion(profile?: string, regionCustom?: string): Promise<void> {
   if (regionCustom) {
     debug('Setting region to custom:', regionCustom);
@@ -55,19 +67,21 @@ export async function setAWSRegion(profile?: string, regionCustom?: string): Pro
   profile = profile || process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || 'default';
   debug('Find region for profile:', profile);
 
-  // Defaults inside constructor
-  const toCheck = [
-    { filename: credentialsFileName(), profile },
-    { isConfig: true, filename: configFileName(), profile },
-    { isConfig: true, filename: configFileName(), profile: 'default' },
-  ];
-
   let region =
     process.env.AWS_REGION ||
     process.env.AMAZON_REGION ||
     process.env.AWS_DEFAULT_REGION ||
     process.env.AMAZON_DEFAULT_REGION;
 
+  // Try different region configs to find correct region
+  // 1. From credentials file with given profile
+  // 2. From config file with given profile
+  // 3. From config file with default profile
+  const toCheck = [
+    { filename: credentialsFileName(), profile },
+    { isConfig: true, filename: configFileName(), profile },
+    { isConfig: true, filename: configFileName(), profile: 'default' },
+  ];
   while (!region && toCheck.length > 0) {
     const options = toCheck.shift();
     if (options && fs.existsSync(options.filename)) {
@@ -95,10 +109,16 @@ export async function setAWSRegion(profile?: string, regionCustom?: string): Pro
   AWS.config.update({ region });
 }
 
+/**
+ * Wrapper function to get better types for environment credenatials
+ */
 function environmentCredentials(prefix: string): () => AWS.EnvironmentCredentials {
   return (): AWS.EnvironmentCredentials => new AWS.EnvironmentCredentials(prefix);
 }
 
+/**
+ * Set credentials and region to AWS from config and env variables
+ */
 export async function setAWSCredentials(profile?: string, region?: string): Promise<void> {
   const sources: (() => AWS.Credentials)[] = [environmentCredentials('AWS'), environmentCredentials('AMAZON')];
 
@@ -110,7 +130,14 @@ export async function setAWSCredentials(profile?: string, region?: string): Prom
   AWS.config.update({ credentials });
 
   // If region is defined, then set that up as well
-  if (region) {
-    await setAWSRegion(profile, region);
+  await setAWSRegion(profile, region);
+}
+
+/**
+ * Throws error if credentials are missing
+ */
+export function validateCredentials() {
+  if (!AWS.config.credentials) {
+    throw new Error('AWS credentials not set');
   }
 }

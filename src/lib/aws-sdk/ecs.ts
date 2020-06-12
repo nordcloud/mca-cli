@@ -1,11 +1,10 @@
 import * as AWS from 'aws-sdk';
+import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 import { match, chunk } from '../utils';
 
 export async function getClusters(include: string[], exclude: string[]): Promise<AWS.ECS.Clusters> {
-  if (!AWS.config.credentials) {
-    throw new Error('AWS credentials not set');
-  }
+  validateCredentials()
 
   const ecs = new AWS.ECS();
 
