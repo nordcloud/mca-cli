@@ -57,9 +57,9 @@ function configFileName(): string {
 /**
  * Check if file is readable
  */
-async function canRead(filePath: string) {
+async function canRead(filePath: string): Promise<boolean> {
   try {
-    await fs.promises.access(filePath, fs.constants.R_OK)
+    await fs.promises.access(filePath, fs.constants.R_OK);
     return true;
   } catch (err) {
     return false;
@@ -94,11 +94,11 @@ export async function setAWSRegion(profile?: string, regionCustom?: string): Pro
     { isConfig: true, filename: configFileName(), profile },
     { isConfig: true, filename: configFileName(), profile: 'default' },
   ];
-  for (let i = 0; (!region && i < toCheck.length); i++) {
+  for (let i = 0; !region && i < toCheck.length; i++) {
     const options = toCheck[i];
 
     try {
-      const contents = await fs.promises.readFile(options.filename)
+      const contents = await fs.promises.readFile(options.filename);
       /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       const config = (AWS as any).util.ini.parse(contents.toString());
 
