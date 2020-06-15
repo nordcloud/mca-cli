@@ -135,17 +135,20 @@ function environmentCredentials(prefix: string): () => AWS.EnvironmentCredential
  * Set credentials and region to AWS from config and env variables
  */
 export async function setAWSCredentials(profile?: string, region?: string): Promise<void> {
-  const sources: (() => AWS.Credentials)[] = [environmentCredentials('AWS'), environmentCredentials('AMAZON')];
+  try {
+    const sources: (() => AWS.Credentials)[] = [environmentCredentials('AWS'), environmentCredentials('AMAZON')];
 
-  profile = profile || process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || 'default';
+    profile = profile || process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || 'default';
 
-  const credentialsExists = await canRead(credentialsFileName());
-  if (credentialsExists) {
-    sources.push(() => new AWS.SharedIniFileCredentials({ profile, tokenCodeFn }));
+    if (await canRead(credentialsFileName())) {
+      sources.push(() => new AWS.SharedIniFileCredentials({ filename: credentialsFileName(), profile, tokenCodeFn }));
+    }
+
+    const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();
+    AWS.config.update({ credentials });
+  } catch (err) {
+    error(err);
   }
-
-  const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();
-  AWS.config.update({ credentials });
 
   // If region is defined, then set that up as well
   await setAWSRegion(profile, region);
