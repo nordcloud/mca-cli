@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import { prompt } from 'inquirer';
 
-import { debug } from '../logger';
+import { debug, error } from '../logger';
 
 /**
  * Ask user for MFA token for given serial
@@ -55,6 +55,18 @@ function configFileName(): string {
 }
 
 /**
+ * Check if file is readable
+ */
+async function canRead(filePath: string) {
+  try {
+    await fs.promises.access(filePath, fs.constants.R_OK)
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+/**
  * Set AWS region
  */
 export async function setAWSRegion(profile?: string, regionCustom?: string): Promise<void> {
@@ -82,18 +94,21 @@ export async function setAWSRegion(profile?: string, regionCustom?: string): Pro
     { isConfig: true, filename: configFileName(), profile },
     { isConfig: true, filename: configFileName(), profile: 'default' },
   ];
-  while (!region && toCheck.length > 0) {
-    const options = toCheck.shift();
-    if (options && fs.existsSync(options.filename)) {
-      const contents: string = fs.readFileSync(options.filename).toString();
+  for (let i = 0; (!region && i < toCheck.length); i++) {
+    const options = toCheck[i];
+
+    try {
+      const contents = await fs.promises.readFile(options.filename)
       /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-      const config = (AWS as any).util.ini.parse(contents);
+      const config = (AWS as any).util.ini.parse(contents.toString());
 
       const profileIndex =
         /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
         profile !== (AWS as any).util.defaultProfile && options.isConfig ? 'profile ' + profile : profile;
 
       region = config[profileIndex || '']?.region;
+    } catch (err) {
+      error('Failed to parse config', options, err);
     }
   }
 
@@ -124,7 +139,10 @@ export async function setAWSCredentials(profile?: string, region?: string): Prom
 
   profile = profile || process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || 'default';
 
-  sources.push(() => new AWS.SharedIniFileCredentials({ profile, tokenCodeFn }));
+  const credentialsExists = await canRead(credentialsFileName());
+  if (credentialsExists) {
+    sources.push(() => new AWS.SharedIniFileCredentials({ profile, tokenCodeFn }));
+  }
 
   const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();
   AWS.config.update({ credentials });
