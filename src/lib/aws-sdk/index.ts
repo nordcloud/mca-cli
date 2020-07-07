@@ -6,3 +6,5 @@ export * from './api_gateway';
 export * from './cloudfront';
 export * from './ssm';
 export * from './logs';
+export * from './rds';
+export * from './eks';

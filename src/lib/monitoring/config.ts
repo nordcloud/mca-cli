@@ -171,6 +171,10 @@ export class ConfigGenerator {
         return ConfigDefaultType.ApiGateway;
       case ConfigLocalType.Cloudfront:
         return ConfigDefaultType.Cloudfront;
+      case ConfigLocalType.RDSInstance:
+        return ConfigDefaultType.RDS;
+      case ConfigLocalType.EKSCluster:
+        return ConfigDefaultType.EKS;
       default:
         return undefined;
     }
@@ -191,6 +195,10 @@ export class ConfigGenerator {
         return ConfigLocalType.ApiGateway;
       case ConfigDefaultType.Cloudfront:
         return ConfigLocalType.Cloudfront;
+      case ConfigDefaultType.RDS:
+        return ConfigLocalType.RDSInstance;
+      case ConfigDefaultType.EKS:
+        return ConfigLocalType.EKSCluster;
       default:
         return undefined;
     }
@@ -233,6 +241,8 @@ export class ConfigGenerator {
     this.combineSingle(ConfigLocalType.Cluster, configNew);
     this.combineSingle(ConfigLocalType.ApiGateway, configNew);
     this.combineSingle(ConfigLocalType.Cloudfront, configNew);
+    this.combineSingle(ConfigLocalType.RDSInstance, configNew);
+    this.combineSingle(ConfigLocalType.EKSCluster, configNew);
   }
 
   public addLambdas(aws: AWSItem): void {
@@ -571,6 +581,191 @@ export class ConfigGenerator {
     };
   }
 
+  public addRDSInstances({ rdsInstances }: AWSItem): void {
+    if (rdsInstances.length === 0) {
+      return;
+    }
+
+    const defaultConfig = {
+      CPUUtilization: {
+        enabled: true,
+        alarm: {
+          threshold: 75,
+          evaluationPeriods: 5,
+        },
+        metric: {
+          period: { minutes: 15 },
+          unit: 'PERCENT',
+          statistic: 'Average',
+        },
+      },
+      FreeStorageSpace: {
+        enabled: true,
+        alarm: {
+          threshold: 1000000000, // 1GB
+          evaluationPeriods: 1,
+          comparisonOperator: 'LESS_THAN_THRESHOLD',
+        },
+        metric: {
+          period: { minutes: 10 },
+          unit: 'Bytes',
+          statistic: 'Minimum',
+        },
+      },
+      DatabaseConnections: {
+        enabled: true,
+        alarm: {
+          threshold: 25,
+          evaluationPeriods: 1,
+        },
+        metric: {
+          period: { minutes: 5 },
+          unit: 'Count',
+          statistic: 'Maximum',
+        },
+      },
+      FreeableMemory: {
+        enabled: true,
+        alarm: {
+          threshold: 75000000, // 75MB
+          evaluationPeriods: 1,
+          comparisonOperator: 'LESS_THAN_THRESHOLD',
+        },
+        metric: {
+          period: { minutes: 5 },
+          unit: 'Bytes',
+          statistic: 'Average',
+        },
+      },
+      ReadLatency: {
+        enabled: true,
+        alarm: {
+          threshold: 1,
+          evaluationPeriods: 1,
+        },
+        metric: {
+          period: { minutes: 5 },
+          unit: 'Seconds',
+          statistic: 'Maximum',
+        },
+      },
+      WriteLatency: {
+        enabled: true,
+        alarm: {
+          threshold: 2,
+          evaluationPeriods: 1,
+        },
+        metric: {
+          period: { minutes: 5 },
+          unit: 'Seconds',
+          statistic: 'Maximum',
+        },
+      },
+      DiskQueueDepth: {
+        enabled: true,
+        alarm: {
+          threshold: 60,
+          evaluationPeriods: 1,
+        },
+        metric: {
+          period: { minutes: 5 },
+          unit: 'Count',
+          statistic: 'Maximum',
+        },
+      },
+      BinLogDiskUsage: { enabled: false },
+      BurstBalance: { enabled: false },
+      CPUCreditUsage: { enabled: false },
+      CPUCreditBalance: { enabled: false },
+      FailedSQLServerAgentJobsCount: { enabled: false },
+      MaximumUsedTransactionIDs: { enabled: false },
+      NetworkReceiveThroughput: { enabled: false },
+      NetworkTransmitThroughput: { enabled: false },
+      OldestReplicationSlotLag: { enabled: false },
+      ReadIOPS: { enabled: false },
+      ReadThroughput: { enabled: false },
+      ReplicaLag: { enabled: false },
+      ReplicationSlotDiskUsage: { enabled: false },
+      SwapUsage: { enabled: false },
+      TransactionLogsDiskUsage: { enabled: false },
+      TransactionLogsGeneration: { enabled: false },
+      WriteIOPS: { enabled: false },
+      WriteThroughput: { enabled: false },
+    };
+
+    this.config = {
+      ...this.config,
+      rdsInstances: rdsInstances.reduce(
+        (acc, i) => ({ ...acc, [i.DBInstanceIdentifier || '']: {} }),
+        {} as ConfigLocals,
+      ),
+      custom: {
+        ...this.config.custom,
+        default: {
+          ...this.config.custom.default,
+          rds: defaultConfig,
+        },
+      },
+    };
+  }
+
+  public addEKSClusters({ eksClusters }: AWSItem): void {
+    if (eksClusters.length === 0) {
+      return;
+    }
+
+    /* eslint-disable @typescript-eslint/camelcase */
+    const defaultConfig = {
+      cluster_failed_node_count: {
+        enabled: true,
+        alarm: {
+          threshold: 1,
+          evaluationPeriods: 1,
+        },
+        metric: {
+          period: { minutes: 5 },
+          statistic: 'Maximum',
+        },
+      },
+      cluster_node_count: { enabled: false },
+      namespace_number_of_running_pods: { enabled: false },
+      node_cpu_limit: { enabled: false },
+      node_cpu_reserved_capacity: { enabled: false },
+      node_cpu_usage_total: { enabled: false },
+      node_cpu_utilization: { enabled: false },
+      node_filesystem_utilization: { enabled: false },
+      node_memory_limit: { enabled: false },
+      node_memory_reserved_capacity: { enabled: false },
+      node_memory_utilization: { enabled: false },
+      node_memory_working_set: { enabled: false },
+      node_network_total_bytes: { enabled: false },
+      node_number_of_running_containers: { enabled: false },
+      node_number_of_running_pods: { enabled: false },
+      pod_cpu_reserved_capacity: { enabled: false },
+      pod_cpu_utilization: { enabled: false },
+      pod_cpu_utilization_over_pod_limit: { enabled: false },
+      pod_memory_reserved_capacity: { enabled: false },
+      pod_memory_utilization: { enabled: false },
+      pod_memory_utilization_over_pod_limit: { enabled: false },
+      pod_number_of_container_restarts: { enabled: false },
+      pod_network_rx_bytes: { enabled: false },
+      pod_network_tx_bytes: { enabled: false },
+      service_number_of_running_pods: { enabled: false },
+    };
+
+    this.config = {
+      ...this.config,
+      eksClusters: eksClusters.reduce((acc, c) => ({ ...acc, [c || '']: {} }), {}),
+      custom: {
+        ...this.config.custom,
+        default: {
+          ...this.config.custom.default,
+          eks: defaultConfig,
+        },
+      },
+    };
+  }
+
   public addAllLocal(aws: AWSItem): void {
     this.addLambdas(aws);
     this.addTables(aws);
@@ -578,5 +773,7 @@ export class ConfigGenerator {
     this.addClusters(aws);
     this.addRoutes(aws);
     this.addDistributions(aws);
+    this.addRDSInstances(aws);
+    this.addEKSClusters(aws);
   }
 }

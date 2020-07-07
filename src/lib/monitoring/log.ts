@@ -73,6 +73,32 @@ function listDistributions({ distributions }: AWSItem): void {
   highlight('');
 }
 
+function listRDSInstances({ rdsInstances }: AWSItem): void {
+  if (rdsInstances.length === 0) {
+    return;
+  }
+
+  highlight('');
+  highlight('RDS Instances:');
+  rdsInstances.forEach(i => {
+    highlight('  - ', i.DBInstanceIdentifier);
+  });
+  highlight('');
+}
+
+function listEKSClusters({ eksClusters }: AWSItem): void {
+  if (eksClusters.length === 0) {
+    return;
+  }
+
+  highlight('');
+  highlight('EKS Clusters:');
+  eksClusters.forEach(c => {
+    highlight('  - ', c);
+  });
+  highlight('');
+}
+
 /**
  * Log all AWS items
  */
@@ -82,4 +108,6 @@ export function logAWS(aws: AWSItem): void {
   listClusters(aws);
   listRoutes(aws);
   listDistributions(aws);
+  listRDSInstances(aws);
+  listEKSClusters(aws);
 }

@@ -91,6 +91,14 @@ export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string)
   aws.distributions.forEach(d => {
     highlight('  -', d.Id);
   });
+  highlight('RDS Instances:', aws.rdsInstances.length);
+  aws.rdsInstances.forEach(i => {
+    highlight('  -', i.DBInstanceIdentifier);
+  });
+  highlight('EKS Clusters:', aws.eksClusters.length);
+  aws.eksClusters.forEach(c => {
+    highlight('  -', c);
+  });
   highlight('');
 };
 

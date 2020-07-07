@@ -38,8 +38,8 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       alias: 'service',
       describe: 'List of services',
       type: 'array',
-      choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront'],
-      default: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront'],
+      choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks'],
+      default: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks'],
     },
     d: {
       alias: 'dry',

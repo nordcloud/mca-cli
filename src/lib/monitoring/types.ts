@@ -4,6 +4,8 @@ export interface AWSItem {
   clusters: AWS.ECS.Clusters;
   routes: AWS.APIGateway.RestApi[];
   distributions: AWS.CloudFront.DistributionSummary[];
+  rdsInstances: AWS.RDS.DBInstanceList;
+  eksClusters: AWS.EKS.StringList;
 }
 
 export interface Args {
@@ -157,6 +159,8 @@ export interface ConfigCustomDefaults {
   cluster?: ConfigMetricAlarms;
   apiGateway?: ConfigMetricAlarms;
   cloudfront?: ConfigMetricAlarms;
+  rds?: ConfigMetricAlarms;
+  eks?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {
@@ -178,6 +182,8 @@ export interface Config {
   clusters?: ConfigLocals;
   routes?: ConfigLocals;
   distributions?: ConfigLocals;
+  rdsInstances?: ConfigLocals;
+  eksClusters?: ConfigLocals;
   custom: ConfigCustom;
 }
 
@@ -187,6 +193,8 @@ export enum ConfigLocalType {
   Cluster = 'clusters',
   ApiGateway = 'routes',
   Cloudfront = 'distributions',
+  RDSInstance = 'rdsInstances',
+  EKSCluster = 'eksClusters',
 }
 
 export enum ConfigDefaultType {
@@ -196,4 +204,6 @@ export enum ConfigDefaultType {
   Cluster = 'cluster',
   ApiGateway = 'apiGateway',
   Cloudfront = 'cloudfront',
+  RDS = 'rds',
+  EKS = 'eks',
 }
