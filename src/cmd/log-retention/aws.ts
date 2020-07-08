@@ -1,5 +1,6 @@
 import { Argv } from 'yargs';
 import * as types from '../../lib/log-retention/aws/types';
+import { setAWSCredentials } from '../../lib/aws-sdk';
 import { SetRetentions } from '../../lib/log-retention/aws/update';
 
 export const command = 'aws <profile> [options]';
@@ -34,5 +35,6 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 };
 
 export const handler = async (args: types.CmdParams): Promise<void> => {
+  await setAWSCredentials(args.profile, args.region);
   SetRetentions(args);
 };

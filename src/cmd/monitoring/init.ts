@@ -1,6 +1,6 @@
 import { Argv } from 'yargs';
 
-import { monitoring } from '../../lib';
+import { monitoring, aws } from '../../lib';
 import { setVerbose } from '../../lib/logger';
 
 export const command = 'init [options]';
@@ -74,13 +74,14 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
   setVerbose(args.verbose);
+  await aws.setAWSCredentials(args.profile, args.region);
 
-  const aws = await monitoring.getAllFromAWS(args);
+  const awsConfig = await monitoring.getAllFromAWS(args);
 
   if (args.dry) {
-    monitoring.logAWS(aws);
+    monitoring.logAWS(awsConfig);
     return;
   }
 
-  await monitoring.generateMonitoring(aws, args);
+  await monitoring.generateMonitoring(awsConfig, args);
 };

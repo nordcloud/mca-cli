@@ -1,2 +1,3 @@
 import * as monitoring from './monitoring';
-export { monitoring };
+import * as aws from './aws-sdk';
+export { monitoring, aws };
