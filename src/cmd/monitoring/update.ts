@@ -75,11 +75,11 @@ export const handler = async (args: monitoring.Args): Promise<void> => {
 
   const config = new monitoring.ConfigGenerator(args);
   await config.loadFromFile(args.config);
-  await config.setPagerDutyEndpoint(args);
   const combinedArgs = config.combineCLIArgs(args);
   config.updateCLIArgs(combinedArgs);
 
   const aws = await monitoring.getAllFromAWS(combinedArgs);
+  await config.setPagerDutyEndpoint(combinedArgs);
 
   const newConfig = new monitoring.ConfigGenerator(combinedArgs);
 
