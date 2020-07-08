@@ -1,6 +1,6 @@
 import { Argv } from 'yargs';
 
-import { monitoring } from '../../lib';
+import { monitoring, aws } from '../../lib';
 import { setVerbose } from '../../lib/logger';
 
 export const command = 'update [options]';
@@ -78,12 +78,15 @@ export const handler = async (args: monitoring.Args): Promise<void> => {
   const combinedArgs = config.combineCLIArgs(args);
   config.updateCLIArgs(combinedArgs);
 
-  const aws = await monitoring.getAllFromAWS(combinedArgs);
+  await aws.setAWSCredentials(combinedArgs.profile, combinedArgs.region);
+
   await config.setPagerDutyEndpoint(combinedArgs);
+
+  const awsConfig = await monitoring.getAllFromAWS(combinedArgs);
 
   const newConfig = new monitoring.ConfigGenerator(combinedArgs);
 
-  newConfig.addAllLocal(aws);
+  newConfig.addAllLocal(awsConfig);
 
   config.combine(newConfig);
 

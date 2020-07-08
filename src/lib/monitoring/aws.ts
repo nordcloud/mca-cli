@@ -2,8 +2,6 @@ import * as types from './types';
 import * as aws from '../aws-sdk';
 
 export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
-  await aws.setAWSCredentials(args.profile, args.region);
-
   const { service, include, exclude } = args;
   const functions = service.indexOf('lambda') !== -1 ? await aws.getLambdas(include, exclude) : [];
   const tables = service.indexOf('dynamodb') !== -1 ? await aws.getTables(include, exclude) : [];
