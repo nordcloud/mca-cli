@@ -799,6 +799,42 @@ export class ConfigGenerator {
     };
   }
 
+  public addLogGroups({ logGroups }: AWSItem): void {
+    if (logGroups.length === 0) {
+      return;
+    }
+
+    const defaultConfig = {
+      RuntimeErrors: {
+        enabled: true,
+        alarm: {
+          threshold: 10,
+          evaluationPeriods: 1,
+        },
+        metric: {
+          period: { minutes: 30 },
+          unit: 'Count',
+          statistic: 'Sum',
+        },
+        filter: {
+          pattern: 'Error -401 -403',
+        },
+      },
+    };
+
+    this.config = {
+      ...this.config,
+      logGroups: logGroups.reduce((acc, c) => ({ ...acc, [c.logGroupName || '']: {} }), {}) as ConfigLocals,
+      custom: {
+        ...this.config.custom,
+        default: {
+          ...this.config.custom.default,
+          logGroup: defaultConfig,
+        },
+      },
+    };
+  }
+
   public addAllLocal(aws: AWSItem): void {
     this.addLambdas(aws);
     this.addTables(aws);
@@ -808,5 +844,6 @@ export class ConfigGenerator {
     this.addDistributions(aws);
     this.addRDSInstances(aws);
     this.addEKSClusters(aws);
+    this.addLogGroups(aws);
   }
 }

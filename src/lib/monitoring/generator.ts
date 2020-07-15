@@ -99,6 +99,10 @@ export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string)
   aws.eksClusters.forEach(c => {
     highlight('  -', c);
   });
+  highlight('Log Groups:', aws.logGroups.length);
+  aws.logGroups.forEach(g => {
+    highlight('  -', g.logGroupName);
+  });
   highlight('');
 };
 

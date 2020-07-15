@@ -99,6 +99,19 @@ function listEKSClusters({ eksClusters }: AWSItem): void {
   highlight('');
 }
 
+function listLogGroups({ logGroups }: AWSItem): void {
+  if (logGroups.length === 0) {
+    return;
+  }
+
+  highlight('');
+  highlight('Log Groups:');
+  logGroups.forEach(g => {
+    highlight('  - ', g.logGroupName);
+  });
+  highlight('');
+}
+
 /**
  * Log all AWS items
  */
@@ -110,4 +123,5 @@ export function logAWS(aws: AWSItem): void {
   listDistributions(aws);
   listRDSInstances(aws);
   listEKSClusters(aws);
+  listLogGroups(aws);
 }

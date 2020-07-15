@@ -1,6 +1,7 @@
 import * as AWS from 'aws-sdk';
 import { validateCredentials } from './credentials';
 import { debug } from '../logger';
+import { match } from '../utils';
 
 export async function getLogGroups(): Promise<AWS.CloudWatchLogs.LogGroup[]> {
   validateCredentials();
@@ -27,4 +28,10 @@ export async function setLogGroupRetention(logGroupName: string, retentionInDays
   debug('Putting retention policies');
   const res = await logs.putRetentionPolicy(params).promise();
   debug('Put retention policy response', res);
+}
+
+export async function getFilteredLogGroups(inc: string[], excl: string[]): Promise<AWS.CloudWatchLogs.LogGroup[]> {
+  const logGroups = await getLogGroups();
+
+  return logGroups.filter(({ logGroupName }) => logGroupName && match(logGroupName, inc, excl));
 }

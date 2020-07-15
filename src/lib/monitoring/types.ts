@@ -6,6 +6,7 @@ export interface AWSItem {
   distributions: AWS.CloudFront.DistributionSummary[];
   rdsInstances: AWS.RDS.DBInstanceList;
   eksClusters: AWS.EKS.StringList;
+  logGroups: AWS.CloudWatchLogs.LogGroup[];
 }
 
 export interface Args {
@@ -137,11 +138,16 @@ export interface MetricOptions {
   readonly color?: string;
 }
 
+export interface MetricFilterOptions {
+  pattern?: string;
+}
+
 export interface ConfigMetricAlarm {
   enabled?: boolean;
   autoResolve?: boolean;
   alarm?: AlarmOptions;
   metric?: MetricOptions;
+  filter?: MetricFilterOptions;
 }
 
 export interface ConfigMetricAlarms {
@@ -161,6 +167,7 @@ export interface ConfigCustomDefaults {
   cloudfront?: ConfigMetricAlarms;
   rds?: ConfigMetricAlarms;
   eks?: ConfigMetricAlarms;
+  logGroup?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {
@@ -184,6 +191,7 @@ export interface Config {
   distributions?: ConfigLocals;
   rdsInstances?: ConfigLocals;
   eksClusters?: ConfigLocals;
+  logGroups?: ConfigLocals;
   custom: ConfigCustom;
 }
 
@@ -195,6 +203,7 @@ export enum ConfigLocalType {
   Cloudfront = 'distributions',
   RDSInstance = 'rdsInstances',
   EKSCluster = 'eksClusters',
+  LogGroup = 'logGroups',
 }
 
 export enum ConfigDefaultType {
@@ -206,4 +215,5 @@ export enum ConfigDefaultType {
   Cloudfront = 'cloudfront',
   RDS = 'rds',
   EKS = 'eks',
+  LogGroup = 'logGroup',
 }
