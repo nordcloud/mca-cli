@@ -33,3 +33,7 @@ CLI to help automating MCA work
 
 Unit tests should be in the same location as the code with added spec.ts
 extension. Larger integration tests should be separated to test folder.
+
+## Release
+
+Run `npm run release` to make version bump, add tags and update CHANGELOG automatically.

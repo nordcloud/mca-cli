@@ -16,7 +16,8 @@
     "lint:fix": "eslint . --ext ts --fix",
     "start": "tsc -w -p .",
     "watch": "tsc -w -p .",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "release": "standard-version"
   },
   "dependencies": {
     "aws-sdk": "^2.688.0",
@@ -43,6 +44,7 @@
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
+    "standard-version": "^8.0.2",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
   },
