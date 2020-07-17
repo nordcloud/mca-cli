@@ -3,16 +3,21 @@ import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 import { match } from '../utils';
 
-export async function getLogGroups(): Promise<AWS.CloudWatchLogs.LogGroup[]> {
+export async function getLogGroups(token?: string): Promise<AWS.CloudWatchLogs.LogGroup[]> {
   validateCredentials();
 
   const logs = new AWS.CloudWatchLogs();
 
   debug('Getting logs groups');
-  const res = await logs.describeLogGroups().promise();
-  debug('Log group describe result:', res);
+  const { logGroups = [], nextToken } = await logs.describeLogGroups({ nextToken: token }).promise();
 
-  return res.logGroups || [];
+  if (nextToken) {
+    logGroups.push(...(await getLogGroups(nextToken)));
+  }
+
+  debug('Log group describe result:', logGroups);
+
+  return logGroups;
 }
 
 export async function setLogGroupRetention(logGroupName: string, retentionInDays: number): Promise<void> {
