@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://bitbucket.org/nordcloud/mca-cli/compare/v1.0.0...v1.0.1) (2020-07-17)
+
+
+### Bug Fixes
+
+* **loggroups:** List all log groups properly ([240ae5a](https://bitbucket.org/nordcloud/mca-cli/commit/240ae5af3352b9bcaab3649cbe029495b42f5cd3))
+
 ## 1.0.0 (2020-07-16)
 
 
