@@ -14,10 +14,11 @@ export async function getLambdas(include: string[], exclude: string[]): Promise<
     debug('Getting lambda functions...');
     const res = await lambda.listFunctions({ Marker: nextMarker }).promise();
     (res.Functions || []).forEach(f => functions.push(f));
-    nextMarker = res.NextMarker
+    nextMarker = res.NextMarker;
   } while (nextMarker);
 
   debug('All lambda functions count:', functions?.length || 0);
-  return functions.filter(f => match(f.FunctionName || '', include, exclude))
-                  .sort((a, b) => (a.FunctionName || '').localeCompare(b.FunctionName || ''));
+  return functions
+    .filter(f => match(f.FunctionName || '', include, exclude))
+    .sort((a, b) => (a.FunctionName || '').localeCompare(b.FunctionName || ''));
 }
