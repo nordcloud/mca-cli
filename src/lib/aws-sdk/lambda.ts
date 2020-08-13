@@ -7,9 +7,17 @@ export async function getLambdas(include: string[], exclude: string[]): Promise<
   validateCredentials();
 
   const lambda = new AWS.Lambda();
+  const functions: AWS.Lambda.FunctionList = [];
 
-  debug('Getting lambda functions...');
-  const res = await lambda.listFunctions().promise();
-  debug('All lambda functions count:', res?.Functions?.length || 0);
-  return (res?.Functions || []).filter(f => match(f.FunctionName || '', include, exclude));
+  let nextMarker: string | undefined;
+  do {
+    debug('Getting lambda functions...');
+    const res = await lambda.listFunctions({ Marker: nextMarker }).promise();
+    (res.Functions || []).forEach(f => functions.push(f));
+    nextMarker = res.NextMarker
+  } while (nextMarker);
+
+  debug('All lambda functions count:', functions?.length || 0);
+  return functions.filter(f => match(f.FunctionName || '', include, exclude))
+                  .sort((a, b) => (a.FunctionName || '').localeCompare(b.FunctionName || ''));
 }
