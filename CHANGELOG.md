@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/nordcloud/mca-cli/compare/v1.1.1...v1.2.0) (2020-08-14)
+
+
+### Features
+
+* Change release to use npm pack ([ed25261](https://github.com/nordcloud/mca-cli/commit/ed25261dcb6b58a614f3a0416c7cf790f0ba2af0))
+
 ### [1.1.1](https://github.com/nordcloud/mca-cli/compare/v1.1.0...v1.1.1) (2020-08-14)
 
 ## 1.1.0 (2020-08-13)
