@@ -9,15 +9,19 @@
   "bin": {
     "mca": "./dist/bin/mca.js"
   },
+  "files": [
+    "dist/**/*",
+    "assets/**/*"
+  ],
   "scripts": {
-    "postinstall": "npm run build",
     "test": "ava",
     "lint": "eslint . --ext ts",
     "lint:fix": "eslint . --ext ts --fix",
     "start": "tsc -w -p .",
     "watch": "tsc -w -p .",
     "build": "tsc -p .",
-    "release": "standard-version"
+    "release": "standard-version",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "aws-sdk": "^2.688.0",
