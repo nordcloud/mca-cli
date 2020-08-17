@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/nordcloud/mca-cli/compare/v1.2.0...v1.2.1) (2020-08-17)
+
+
+### Bug Fixes
+
+* Log groups were not updated ([4551cb8](https://github.com/nordcloud/mca-cli/commit/4551cb859001607c4185c5681f3ad99efc7fcdb6))
+* match now works with log groups ([b35162a](https://github.com/nordcloud/mca-cli/commit/b35162a9fe787d38a1e99fc5c93fed3fc9952752))
+
 ## [1.2.0](https://github.com/nordcloud/mca-cli/compare/v1.1.1...v1.2.0) (2020-08-14)
 
 
