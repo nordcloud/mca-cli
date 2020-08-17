@@ -243,6 +243,7 @@ export class ConfigGenerator {
     this.combineSingle(ConfigLocalType.Cloudfront, configNew);
     this.combineSingle(ConfigLocalType.RDSInstance, configNew);
     this.combineSingle(ConfigLocalType.EKSCluster, configNew);
+    this.combineSingle(ConfigLocalType.LogGroup, configNew);
   }
 
   public addLambdas(aws: AWSItem): void {
