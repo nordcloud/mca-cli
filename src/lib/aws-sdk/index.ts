@@ -8,3 +8,7 @@ export * from './ssm';
 export * from './logs';
 export * from './rds';
 export * from './eks';
+export * from './budgets';
+export * from './anomaly';
+export * from './sns';
+export * from './sts';
