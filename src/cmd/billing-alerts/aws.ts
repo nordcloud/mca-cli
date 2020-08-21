@@ -29,8 +29,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
           'Add endpoints directly or AWS SSM params name to retrieve endpoints from SSM, e.g. ssm:my-endpoint-${stage}, stage is always added to the end',
         type: 'array',
       },
-    })
-    .demandOption(['e'], 'Please provide at least 1 endpoint where the alarms will be sent');
+    });
 };
 
 export const handler = async (args: types.CmdParams): Promise<void> => {
