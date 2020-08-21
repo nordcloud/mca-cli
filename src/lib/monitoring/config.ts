@@ -1,7 +1,6 @@
 import * as fs from './fsUtil';
 import * as yaml from 'js-yaml';
-import { getSSMParameter } from '../aws-sdk';
-import { warning, error } from '../logger';
+import { updatePagerDutyEndpoints } from '../utils';
 
 import { Args, Config, AWSItem, ConfigLocals, ConfigLocalType, ConfigDefaultType } from './types';
 import diff from './diff';
@@ -36,33 +35,7 @@ export class ConfigGenerator {
   }
 
   public async setPagerDutyEndpoint(args: Args): Promise<void> {
-    if (args.endpoints.length < 1) {
-      warning('No endpoints given!!');
-    }
-
-    const endpoints = this.config.custom.snsTopic.endpoints;
-    for (const [index, endpoint] of args.endpoints.entries()) {
-      if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
-        // Removes the ssm: at the beginning of string and retrieve SSM param value
-        const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
-        try {
-          const paramValue = await getSSMParameter(ssmParam, true);
-          if (!paramValue) {
-            error('No SSM parameter', ssmParam, 'available!');
-          } else if (endpoints[index] !== paramValue) {
-            endpoints[index] = paramValue;
-          }
-        } catch (err) {
-          error('No SSM parameter', ssmParam, 'available!', err);
-        }
-      } else if (endpoints[index] !== endpoint) {
-        // Update existing endpoints
-        endpoints[index] = endpoint;
-      } else if (index >= endpoints.length) {
-        // Add new endpoints
-        endpoints.push(endpoint);
-      }
-    }
+    await updatePagerDutyEndpoints(args.endpoints, args.stage, this.config.custom.snsTopic.endpoints);
   }
 
   /**
