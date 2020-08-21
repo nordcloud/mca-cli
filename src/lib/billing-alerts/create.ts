@@ -90,7 +90,7 @@ export async function setBillingAlerts(args: CmdParams): Promise<void> {
   await putAnomalyDetector(anomalyDetectorParams);
 
   const anomalyDetectorAlarmParams: PutMetricAlarmInput = {
-    AlarmName: 'AnomalyDetectorAlarm',
+    AlarmName: `${args.profile}-anomaly-detector-${args.stage}`,
     ActionsEnabled: true,
     AlarmActions: [topicArn],
     AlarmDescription:
