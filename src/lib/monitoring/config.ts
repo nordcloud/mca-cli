@@ -1,4 +1,4 @@
-import * as fs from './fsUtil';
+import * as fs from '../utils/fsUtil';
 import * as yaml from 'js-yaml';
 import { updatePagerDutyEndpoints } from '../utils';
 

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as hb from 'handlebars';
 
-import * as fs from './fsUtil';
+import * as fs from '../utils/fsUtil';
 import { Args, AWSItem } from './types';
 import { ConfigGenerator } from './config';
 import { highlight } from '../logger';
