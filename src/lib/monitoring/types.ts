@@ -1,3 +1,5 @@
+import AWS from 'aws-sdk';
+
 export interface AWSItem {
   functions: AWS.Lambda.FunctionList;
   tables: AWS.DynamoDB.TableNameList;
@@ -28,14 +30,23 @@ export interface Args {
  */
 export interface ConfigCLI {
   version: number;
-  profile?: string;
-  region?: string;
+  profile: string;
   services: string[];
   includes: string[];
   excludes: string[];
 }
 
 export interface AlarmOptions {
+  /**
+   * Enable alarm
+   */
+  readonly enabled?: boolean;
+
+  /**
+   * Autoresolve alarm
+   */
+  readonly autoResolve?: boolean;
+
   /**
    * Name of the alarm
    */
@@ -44,7 +55,7 @@ export interface AlarmOptions {
   /**
    * Description for the alarm
    */
-  readonly description?: string;
+  readonly alarmDescription?: string;
 
   /**
    * Comparison to use to check if metric is breaching
@@ -142,20 +153,31 @@ export interface MetricFilterOptions {
   pattern?: string;
 }
 
-export interface ConfigMetricAlarm {
+export interface TopicMap<T> {
+  [topic: string]: T;
+}
+
+export interface ConfigMetricAlarm<T = AlarmOptions, K = MetricOptions> {
   enabled?: boolean;
   autoResolve?: boolean;
-  alarm?: AlarmOptions;
-  metric?: MetricOptions;
+  alarm?: TopicMap<T>;
+  metric?: K;
+}
+
+export interface ConfigMetricAlarms<T = AlarmOptions, K = MetricOptions> {
+  [key: string]: ConfigMetricAlarm<T, K>;
+}
+
+export interface ConfigLogGroupAlarm extends ConfigMetricAlarm {
   filter?: MetricFilterOptions;
 }
 
-export interface ConfigMetricAlarms {
-  [key: string]: ConfigMetricAlarm;
+export interface ConfigLogGroupAlarms {
+  [key: string]: ConfigLogGroupAlarm;
 }
 
-export interface ConfigLocals {
-  [key: string]: ConfigMetricAlarms;
+export interface ConfigLocals<T = ConfigMetricAlarms> {
+  [key: string]: T;
 }
 
 export interface ConfigCustomDefaults {
@@ -167,32 +189,32 @@ export interface ConfigCustomDefaults {
   cloudfront?: ConfigMetricAlarms;
   rds?: ConfigMetricAlarms;
   eks?: ConfigMetricAlarms;
-  logGroup?: ConfigMetricAlarms;
+  logGroup?: ConfigLogGroupAlarms;
 }
 
 export interface ConfigCustomSNS {
   id: string;
   name: string;
   emails?: string[];
-  endpoints: string[];
+  endpoints?: string[];
 }
 
 export interface ConfigCustom {
   default: ConfigCustomDefaults;
-  snsTopic: ConfigCustomSNS;
+  snsTopic: TopicMap<ConfigCustomSNS>;
 }
 
 export interface Config {
   cli: ConfigCLI;
-  lambdas?: ConfigLocals;
-  tables?: ConfigLocals;
-  clusters?: ConfigLocals;
-  routes?: ConfigLocals;
-  distributions?: ConfigLocals;
-  rdsInstances?: ConfigLocals;
-  eksClusters?: ConfigLocals;
-  logGroups?: ConfigLocals;
   custom: ConfigCustom;
+  lambdas?: ConfigLocals<ConfigMetricAlarms>;
+  tables?: ConfigLocals<ConfigMetricAlarms>;
+  clusters?: ConfigLocals<ConfigMetricAlarms>;
+  routes?: ConfigLocals<ConfigMetricAlarms>;
+  distributions?: ConfigLocals<ConfigMetricAlarms>;
+  rdsInstances?: ConfigLocals<ConfigMetricAlarms>;
+  eksClusters?: ConfigLocals<ConfigMetricAlarms>;
+  logGroups?: ConfigLocals<ConfigLogGroupAlarms>;
 }
 
 export enum ConfigLocalType {
@@ -201,8 +223,8 @@ export enum ConfigLocalType {
   Cluster = 'clusters',
   ApiGateway = 'routes',
   Cloudfront = 'distributions',
-  RDSInstance = 'rdsInstances',
-  EKSCluster = 'eksClusters',
+  RdsInstance = 'rdsInstances',
+  EksCluster = 'eksClusters',
   LogGroup = 'logGroups',
 }
 
@@ -213,7 +235,7 @@ export enum ConfigDefaultType {
   Cluster = 'cluster',
   ApiGateway = 'apiGateway',
   Cloudfront = 'cloudfront',
-  RDS = 'rds',
-  EKS = 'eks',
+  RdsInstance = 'rds',
+  EksCluster = 'eks',
   LogGroup = 'logGroup',
 }

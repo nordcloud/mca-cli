@@ -3,8 +3,11 @@ import * as yaml from 'js-yaml';
 import { getSSMParameter } from '../aws-sdk';
 import { warning, error } from '../logger';
 
-import { Args, Config, AWSItem, ConfigLocals, ConfigLocalType, ConfigDefaultType } from './types';
+import { Config, ConfigCustomSNS, ConfigLocals, ConfigLocalType, ConfigDefaultType, ConfigMetricAlarms, ConfigCustomDefaults, ConfigLogGroupAlarms } from './types';
+import { Args, AWSItem } from './types';
 import diff from './diff';
+
+type AlarmMetricConfig = ConfigLocals<ConfigMetricAlarms>
 
 export class ConfigGenerator {
   private config: Config;
@@ -18,14 +21,17 @@ export class ConfigGenerator {
         services: service,
         includes: include,
         excludes: exclude,
+        profile: profile || '',
       },
       custom: {
         default: {},
         snsTopic: {
-          name: 'Topic for mca monitoring alarms',
-          id: args.profile ? `${args.profile}-alerts-alarm-${args.stage}` : `alerts-alarm-${args.stage}`,
-          endpoints: [],
-          emails: [],
+          critical: {
+            name: 'Topic for mca monitoring alarms',
+            id: args.profile ? `${args.profile}-alerts-alarm-${args.stage}` : `alerts-alarm-${args.stage}`,
+            endpoints: [],
+            emails: [],
+          }
         },
       },
     };
@@ -40,29 +46,52 @@ export class ConfigGenerator {
       warning('No endpoints given!!');
     }
 
-    const endpoints = this.config.custom.snsTopic.endpoints;
-    for (const [index, endpoint] of args.endpoints.entries()) {
-      if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
-        // Removes the ssm: at the beginning of string and retrieve SSM param value
-        const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
-        try {
-          const paramValue = await getSSMParameter(ssmParam, true);
-          if (!paramValue) {
-            error('No SSM parameter', ssmParam, 'available!');
-          } else if (endpoints[index] !== paramValue) {
-            endpoints[index] = paramValue;
-          }
-        } catch (err) {
-          error('No SSM parameter', ssmParam, 'available!', err);
-        }
-      } else if (endpoints[index] !== endpoint) {
-        // Update existing endpoints
-        endpoints[index] = endpoint;
-      } else if (index >= endpoints.length) {
-        // Add new endpoints
-        endpoints.push(endpoint);
+    // Convert old topic format to new one
+    if (this.config.custom.snsTopic.id && this.config.custom.snsTopic.name) {
+      this.config.custom.snsTopic = {
+        critical: this.config.custom.snsTopic as unknown as ConfigCustomSNS
       }
     }
+
+    // Convert SSM variables to clear text
+    // TODO: This should really be handled in mca-monitoring...
+    const topicEntries = await Promise.all(
+      Object.entries(this.config.custom.snsTopic).map(async ([topicKey, topic]) => {
+        const endpoints = await Promise.all(
+          (topic.endpoints || []).map(async (endpoint) => {
+            if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
+              // Removes the ssm: at the beginning of string and retrieve SSM param value
+              const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
+              try {
+                const paramValue = await getSSMParameter(ssmParam, true);
+                if (!paramValue) {
+                  error('No SSM parameter', ssmParam, 'available!');
+                  return;
+                } else if (endpoint !== paramValue) {
+                  return paramValue;
+                }
+              } catch (err) {
+                error('No SSM parameter', ssmParam, 'available!', err);
+                return
+              }
+            } else {
+              return endpoint;
+            }
+          })
+        );
+        const newTopic = {
+          ...topic,
+          endpoints: endpoints.filter(e => e) as string[],
+        }
+        return [topicKey, newTopic]
+      })
+    ) as [string, ConfigCustomSNS][];
+
+    // Generate map from list
+    this.config.custom.snsTopic = topicEntries.reduce((acc, [key, topic]) => ({
+      ...acc,
+      [key]: topic
+    }), {});
   }
 
   /**
@@ -109,21 +138,7 @@ export class ConfigGenerator {
    * Update CLI args
    */
   public updateCLIArgs(args: Args): void {
-    const { profile, service, include, exclude, stage } = args;
-
-    // Initially generated config might have undefined sns topic
-    if (this.config.custom.snsTopic.id.search('undefined') !== -1) {
-      this.config = {
-        ...this.config,
-        custom: {
-          ...this.config.custom,
-          snsTopic: {
-            ...this.config.custom.snsTopic,
-            id: profile ? `${profile}-alerts-${stage}-alarm` : `alerts-${stage}-alarm`,
-          },
-        },
-      };
-    }
+    const { profile, service, include, exclude } = args;
 
     this.config = {
       ...this.config,
@@ -171,10 +186,10 @@ export class ConfigGenerator {
         return ConfigDefaultType.ApiGateway;
       case ConfigLocalType.Cloudfront:
         return ConfigDefaultType.Cloudfront;
-      case ConfigLocalType.RDSInstance:
-        return ConfigDefaultType.RDS;
-      case ConfigLocalType.EKSCluster:
-        return ConfigDefaultType.EKS;
+      case ConfigLocalType.RdsInstance:
+        return ConfigDefaultType.RdsInstance;
+      case ConfigLocalType.EksCluster:
+        return ConfigDefaultType.EksCluster;
       default:
         return undefined;
     }
@@ -195,10 +210,10 @@ export class ConfigGenerator {
         return ConfigLocalType.ApiGateway;
       case ConfigDefaultType.Cloudfront:
         return ConfigLocalType.Cloudfront;
-      case ConfigDefaultType.RDS:
-        return ConfigLocalType.RDSInstance;
-      case ConfigDefaultType.EKS:
-        return ConfigLocalType.EKSCluster;
+      case ConfigDefaultType.RdsInstance:
+        return ConfigLocalType.RdsInstance;
+      case ConfigDefaultType.EksCluster:
+        return ConfigLocalType.EksCluster;
       default:
         return undefined;
     }
@@ -211,14 +226,43 @@ export class ConfigGenerator {
    */
   private combineSingle(localKey: ConfigLocalType, configNew: Config): void {
     if (configNew?.[localKey]) {
-      this.config[localKey] = Object.keys(configNew?.[localKey] || []).reduce(
-        (acc, key) => ({
-          ...acc,
-          [key]: {
-            ...(this.config?.[localKey]?.[key] || {}),
-            ...(configNew?.[localKey]?.[key] || {}),
-          },
-        }),
+      this.config[localKey] = Object.entries(configNew?.[localKey] || []).reduce(
+        (acc, [key, newConfig]) => {
+          const oldConfig = this.config?.[localKey]?.[key];
+          if (oldConfig) {
+            // Convert old format to new one
+            const fixedConfig = Object.keys(oldConfig).reduce((acc, key) => {
+              const entry = oldConfig[key];
+              if (entry?.alarm?.threshold) {
+                return {
+                  ...acc,
+                  [key]: {
+                    ...entry,
+                    alarm: {
+                      critical: entry.alarm,
+                    },
+                  },
+                } as ConfigMetricAlarms;
+              }
+              return {
+                ...acc,
+                [key]: entry
+              } as ConfigMetricAlarms;
+            }, {} as ConfigMetricAlarms)
+
+            return {
+              ...acc,
+              [key]: {
+                ...fixedConfig,
+                ...newConfig,
+              },
+            };
+          }
+          return {
+            ...acc,
+            [key]: newConfig,
+          };
+        },
         {},
       );
     } else {
@@ -236,13 +280,45 @@ export class ConfigGenerator {
   public combine(configNewGenerator: ConfigGenerator): void {
     const configNew = configNewGenerator.getConfig();
 
+    // Convert old topic format to new one
+    if(this.config.custom.snsTopic.id && this.config.custom.snsTopic.name) {
+      this.config.custom.snsTopic = {
+        critical: this.config.custom.snsTopic as unknown as ConfigCustomSNS
+      }
+    }
+
+    // Convert old default alarms to new one
+    const defaultEntries = Object.entries(this.config.custom.default) as [string, ConfigMetricAlarms | ConfigLogGroupAlarms][]
+    this.config.custom.default = defaultEntries.reduce((acc, [key, entry]) => {
+      return {
+        ...acc,
+        [key]: Object.entries(entry).reduce((acc, [key, entry]) => {
+          if (entry?.alarm?.threshold) {
+            return {
+              ...acc,
+              [key]: {
+                ...entry,
+                alarm: {
+                  critical: entry.alarm,
+                },
+              },
+            } as ConfigMetricAlarms;
+          }
+          return {
+            ...acc,
+            [key]: entry
+          } as ConfigMetricAlarms;
+        }, {} as ConfigMetricAlarms | ConfigLogGroupAlarms)
+      }
+    }, {} as ConfigCustomDefaults);
+
     this.combineSingle(ConfigLocalType.Lambda, configNew);
     this.combineSingle(ConfigLocalType.Table, configNew);
     this.combineSingle(ConfigLocalType.Cluster, configNew);
     this.combineSingle(ConfigLocalType.ApiGateway, configNew);
     this.combineSingle(ConfigLocalType.Cloudfront, configNew);
-    this.combineSingle(ConfigLocalType.RDSInstance, configNew);
-    this.combineSingle(ConfigLocalType.EKSCluster, configNew);
+    this.combineSingle(ConfigLocalType.RdsInstance, configNew);
+    this.combineSingle(ConfigLocalType.EksCluster, configNew);
     this.combineSingle(ConfigLocalType.LogGroup, configNew);
   }
 
@@ -256,32 +332,56 @@ export class ConfigGenerator {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 10,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 1,
+            evaluationPeriods: 1,
+          }
+        },
+        metric: {
+          period: { minutes: 5 },
+          statistic: 'Sum',
         },
       },
       Invocations: {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 200,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 1000,
+            evaluationPeriods: 1,
+          },
+        },
+        metric: {
+          period: { minutes: 5 },
+          statistic: 'Sum',
         },
       },
       Duration: {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 2000,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 2000,
+            evaluationPeriods: 1,
+          },
         },
+        metric: {
+          period: { minutes: 5 },
+          statistic: 'Average',
+        }
       },
       Throttles: {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 10,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 1,
+            evaluationPeriods: 1,
+          },
+        },
+        metric: {
+          period: { minutes: 5 },
+          statistic: 'Sum',
         },
       },
       DeadLetterErrors: { enabled: false },
@@ -297,7 +397,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName || '']: {} }), {} as ConfigLocals),
+      lambdas: aws.functions.reduce((acc, f) => ({ ...acc, [f.FunctionName || '']: {} }), {} as AlarmMetricConfig),
       custom: {
         ...this.config.custom,
         default: {
@@ -318,8 +418,10 @@ export class ConfigGenerator {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 10,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 100,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -330,8 +432,10 @@ export class ConfigGenerator {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 200,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 200,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -342,8 +446,10 @@ export class ConfigGenerator {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 2000,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 2000,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -354,8 +460,10 @@ export class ConfigGenerator {
         enabled: true,
         autoResolve: false,
         alarm: {
-          threshold: 10,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 10,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -383,7 +491,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t]: {} }), {} as ConfigLocals),
+      tables: aws.tables.reduce((acc, t) => ({ ...acc, [t]: {} }), {} as AlarmMetricConfig),
       custom: {
         ...this.config.custom,
         default: {
@@ -428,8 +536,10 @@ export class ConfigGenerator {
       CPUUtilization: {
         enabled: true,
         alarm: {
-          threshold: 90,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 90,
+            evaluationPeriods: 1,
+          }
         },
         metric: {
           period: { minutes: 5 },
@@ -439,8 +549,10 @@ export class ConfigGenerator {
       MemoryUtilization: {
         enabled: true,
         alarm: {
-          threshold: 90,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 90,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -454,7 +566,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName || '']: {} }), {} as ConfigLocals),
+      clusters: clusters.reduce((acc, c) => ({ ...acc, [c.clusterName || '']: {} }), {} as AlarmMetricConfig),
       custom: {
         ...this.config.custom,
         default: {
@@ -471,23 +583,13 @@ export class ConfigGenerator {
     }
 
     const defaultConfig = {
-      '4XXError': {
-        enabled: true,
-        alarm: {
-          threshold: 10,
-          evaluationPeriods: 1,
-        },
-        metric: {
-          period: { minutes: 5 },
-          unit: 'COUNT',
-          statistic: 'Sum',
-        },
-      },
       '5XXError': {
         enabled: true,
         alarm: {
-          threshold: 1,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 1,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -495,17 +597,8 @@ export class ConfigGenerator {
           statistic: 'Sum',
         },
       },
-      Latency: {
-        enabled: true,
-        alarm: {
-          threshold: 10000,
-          evaluationPeriods: 1,
-        },
-        metric: {
-          period: { minutes: 5 },
-          unit: 'MILLISECOND',
-        },
-      },
+      '4XXError': { enabled: false },
+      Latency: { enabled: false },
       CacheHitCount: { enabled: false },
       CacheMissCount: { enabled: false },
       Count: { enabled: false },
@@ -514,7 +607,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      routes: routes.reduce((acc, r) => ({ ...acc, [r.name || '']: {} }), {} as ConfigLocals),
+      routes: routes.reduce((acc, r) => ({ ...acc, [r.name || '']: {} }), {} as AlarmMetricConfig),
       custom: {
         ...this.config.custom,
         default: {
@@ -531,23 +624,13 @@ export class ConfigGenerator {
     }
 
     const defaultConfig = {
-      '4XXErrorRate': {
-        enabled: true,
-        alarm: {
-          threshold: 5,
-          evaluationPeriods: 1,
-        },
-        metric: {
-          period: { minutes: 5 },
-          unit: 'PERCENT',
-          statistic: 'Average',
-        },
-      },
       '5XXErrorRate': {
         enabled: true,
         alarm: {
-          threshold: 1,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 1,
+            evaluationPeriods: 1,
+          }
         },
         metric: {
           period: { minutes: 5 },
@@ -555,6 +638,7 @@ export class ConfigGenerator {
           statistic: 'Average',
         },
       },
+      '4XXErrorRate': { enabled: false },
       '401ErrorRate': { enabled: false },
       '403ErrorRate': { enabled: false },
       '404ErrorRate': { enabled: false },
@@ -591,8 +675,10 @@ export class ConfigGenerator {
       CPUUtilization: {
         enabled: true,
         alarm: {
-          threshold: 75,
-          evaluationPeriods: 5,
+          critical: {
+            threshold: 75,
+            evaluationPeriods: 5,
+          },
         },
         metric: {
           period: { minutes: 15 },
@@ -603,9 +689,11 @@ export class ConfigGenerator {
       FreeStorageSpace: {
         enabled: true,
         alarm: {
-          threshold: 1000000000, // 1GB
-          evaluationPeriods: 1,
-          comparisonOperator: 'LESS_THAN_THRESHOLD',
+          critical: {
+            threshold: 1000000000, // 1GB
+            evaluationPeriods: 1,
+            comparisonOperator: 'LESS_THAN_THRESHOLD',
+          },
         },
         metric: {
           period: { minutes: 10 },
@@ -616,8 +704,10 @@ export class ConfigGenerator {
       DatabaseConnections: {
         enabled: true,
         alarm: {
-          threshold: 25,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 25,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -628,9 +718,11 @@ export class ConfigGenerator {
       FreeableMemory: {
         enabled: true,
         alarm: {
-          threshold: 75000000, // 75MB
-          evaluationPeriods: 1,
-          comparisonOperator: 'LESS_THAN_THRESHOLD',
+          critical: {
+            threshold: 75000000, // 75MB
+            evaluationPeriods: 1,
+            comparisonOperator: 'LESS_THAN_THRESHOLD',
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -641,8 +733,10 @@ export class ConfigGenerator {
       ReadLatency: {
         enabled: true,
         alarm: {
-          threshold: 1,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 1,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -653,8 +747,10 @@ export class ConfigGenerator {
       WriteLatency: {
         enabled: true,
         alarm: {
-          threshold: 2,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 2,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -665,8 +761,10 @@ export class ConfigGenerator {
       DiskQueueDepth: {
         enabled: true,
         alarm: {
-          threshold: 60,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 60,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -698,7 +796,7 @@ export class ConfigGenerator {
       ...this.config,
       rdsInstances: rdsInstances.reduce(
         (acc, i) => ({ ...acc, [i.DBInstanceIdentifier || '']: {} }),
-        {} as ConfigLocals,
+        {} as AlarmMetricConfig,
       ),
       custom: {
         ...this.config.custom,
@@ -720,8 +818,10 @@ export class ConfigGenerator {
       cluster_failed_node_count: {
         enabled: true,
         alarm: {
-          threshold: 1,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 1,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -731,8 +831,10 @@ export class ConfigGenerator {
       node_cpu_utilization: {
         enabled: true,
         alarm: {
-          threshold: 75,
-          evaluationPeriods: 5,
+          critical: {
+            threshold: 75,
+            evaluationPeriods: 5,
+          },
         },
         metric: {
           period: { minutes: 15 },
@@ -743,8 +845,10 @@ export class ConfigGenerator {
       node_memory_utilization: {
         enabled: true,
         alarm: {
-          threshold: 75,
-          evaluationPeriods: 5,
+          critical: {
+            threshold: 75,
+            evaluationPeriods: 5,
+          },
         },
         metric: {
           period: { minutes: 15 },
@@ -755,8 +859,10 @@ export class ConfigGenerator {
       pod_number_of_container_restarts: {
         enabled: true,
         alarm: {
-          threshold: 20,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 20,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 15 },
@@ -809,8 +915,10 @@ export class ConfigGenerator {
       RuntimeErrors: {
         enabled: true,
         alarm: {
-          threshold: 10,
-          evaluationPeriods: 1,
+          critical: {
+            threshold: 10,
+            evaluationPeriods: 1,
+          },
         },
         metric: {
           period: { minutes: 30 },
@@ -825,7 +933,7 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      logGroups: logGroups.reduce((acc, c) => ({ ...acc, [c.logGroupName || '']: {} }), {}) as ConfigLocals,
+      logGroups: logGroups.reduce((acc, c) => ({ ...acc, [c.logGroupName || '']: {} }), {} as AlarmMetricConfig),
       custom: {
         ...this.config.custom,
         default: {
