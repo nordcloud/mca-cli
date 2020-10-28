@@ -58,7 +58,7 @@ export class ConfigGenerator {
     const topicEntries = await Promise.all(
       Object.entries(this.config.custom.snsTopic).map(async ([topicKey, topic]) => {
         const endpoints = await Promise.all(
-          (topic.endpoints || []).map(async (endpoint) => {
+          (args.endpoints || []).map(async endpoint => {
             if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
               // Removes the ssm: at the beginning of string and retrieve SSM param value
               const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
