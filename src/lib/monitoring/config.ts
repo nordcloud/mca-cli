@@ -3,11 +3,20 @@ import * as yaml from 'js-yaml';
 import { getSSMParameter } from '../aws-sdk';
 import { warning, error } from '../logger';
 
-import { Config, ConfigCustomSNS, ConfigLocals, ConfigLocalType, ConfigDefaultType, ConfigMetricAlarms, ConfigCustomDefaults, ConfigLogGroupAlarms } from './types';
+import {
+  Config,
+  ConfigCustomSNS,
+  ConfigLocals,
+  ConfigLocalType,
+  ConfigDefaultType,
+  ConfigMetricAlarms,
+  ConfigCustomDefaults,
+  ConfigLogGroupAlarms,
+} from './types';
 import { Args, AWSItem } from './types';
 import diff from './diff';
 
-type AlarmMetricConfig = ConfigLocals<ConfigMetricAlarms>
+type AlarmMetricConfig = ConfigLocals<ConfigMetricAlarms>;
 
 export class ConfigGenerator {
   private config: Config;
@@ -31,7 +40,7 @@ export class ConfigGenerator {
             id: args.profile ? `${args.profile}-alerts-alarm-${args.stage}` : `alerts-alarm-${args.stage}`,
             endpoints: [],
             emails: [],
-          }
+          },
         },
       },
     };
@@ -49,16 +58,16 @@ export class ConfigGenerator {
     // Convert old topic format to new one
     if (this.config.custom.snsTopic.id && this.config.custom.snsTopic.name) {
       this.config.custom.snsTopic = {
-        critical: this.config.custom.snsTopic as unknown as ConfigCustomSNS
-      }
+        critical: (this.config.custom.snsTopic as unknown) as ConfigCustomSNS,
+      };
     }
 
     // Convert SSM variables to clear text
     // TODO: This should really be handled in mca-monitoring...
-    const topicEntries = await Promise.all(
+    const topicEntries = (await Promise.all(
       Object.entries(this.config.custom.snsTopic).map(async ([topicKey, topic]) => {
         const endpoints = await Promise.all(
-          (topic.endpoints || []).map(async (endpoint) => {
+          (args.endpoints || []).map(async endpoint => {
             if (endpoint.toLocaleLowerCase().startsWith('ssm:')) {
               // Removes the ssm: at the beginning of string and retrieve SSM param value
               const ssmParam = `${endpoint.slice(4)}-${args.stage}`;
@@ -72,26 +81,29 @@ export class ConfigGenerator {
                 }
               } catch (err) {
                 error('No SSM parameter', ssmParam, 'available!', err);
-                return
+                return;
               }
             } else {
               return endpoint;
             }
-          })
+          }),
         );
         const newTopic = {
           ...topic,
           endpoints: endpoints.filter(e => e) as string[],
-        }
-        return [topicKey, newTopic]
-      })
-    ) as [string, ConfigCustomSNS][];
+        };
+        return [topicKey, newTopic];
+      }),
+    )) as [string, ConfigCustomSNS][];
 
     // Generate map from list
-    this.config.custom.snsTopic = topicEntries.reduce((acc, [key, topic]) => ({
-      ...acc,
-      [key]: topic
-    }), {});
+    this.config.custom.snsTopic = topicEntries.reduce(
+      (acc, [key, topic]) => ({
+        ...acc,
+        [key]: topic,
+      }),
+      {},
+    );
   }
 
   /**
@@ -226,45 +238,42 @@ export class ConfigGenerator {
    */
   private combineSingle(localKey: ConfigLocalType, configNew: Config): void {
     if (configNew?.[localKey]) {
-      this.config[localKey] = Object.entries(configNew?.[localKey] || []).reduce(
-        (acc, [key, newConfig]) => {
-          const oldConfig = this.config?.[localKey]?.[key];
-          if (oldConfig) {
-            // Convert old format to new one
-            const fixedConfig = Object.keys(oldConfig).reduce((acc, key) => {
-              const entry = oldConfig[key];
-              if (entry?.alarm?.threshold) {
-                return {
-                  ...acc,
-                  [key]: {
-                    ...entry,
-                    alarm: {
-                      critical: entry.alarm,
-                    },
-                  },
-                } as ConfigMetricAlarms;
-              }
+      this.config[localKey] = Object.entries(configNew?.[localKey] || []).reduce((acc, [key, newConfig]) => {
+        const oldConfig = this.config?.[localKey]?.[key];
+        if (oldConfig) {
+          // Convert old format to new one
+          const fixedConfig = Object.keys(oldConfig).reduce((acc, key) => {
+            const entry = oldConfig[key];
+            if (entry?.alarm?.threshold) {
               return {
                 ...acc,
-                [key]: entry
+                [key]: {
+                  ...entry,
+                  alarm: {
+                    critical: entry.alarm,
+                  },
+                },
               } as ConfigMetricAlarms;
-            }, {} as ConfigMetricAlarms)
-
+            }
             return {
               ...acc,
-              [key]: {
-                ...fixedConfig,
-                ...newConfig,
-              },
-            };
-          }
+              [key]: entry,
+            } as ConfigMetricAlarms;
+          }, {} as ConfigMetricAlarms);
+
           return {
             ...acc,
-            [key]: newConfig,
+            [key]: {
+              ...fixedConfig,
+              ...newConfig,
+            },
           };
-        },
-        {},
-      );
+        }
+        return {
+          ...acc,
+          [key]: newConfig,
+        };
+      }, {});
     } else {
       if (this.config?.[localKey]) {
         delete this.config[localKey];
@@ -281,14 +290,17 @@ export class ConfigGenerator {
     const configNew = configNewGenerator.getConfig();
 
     // Convert old topic format to new one
-    if(this.config.custom.snsTopic.id && this.config.custom.snsTopic.name) {
+    if (this.config.custom.snsTopic.id && this.config.custom.snsTopic.name) {
       this.config.custom.snsTopic = {
-        critical: this.config.custom.snsTopic as unknown as ConfigCustomSNS
-      }
+        critical: (this.config.custom.snsTopic as unknown) as ConfigCustomSNS,
+      };
     }
 
     // Convert old default alarms to new one
-    const defaultEntries = Object.entries(this.config.custom.default) as [string, ConfigMetricAlarms | ConfigLogGroupAlarms][]
+    const defaultEntries = Object.entries(this.config.custom.default) as [
+      string,
+      ConfigMetricAlarms | ConfigLogGroupAlarms,
+    ][];
     this.config.custom.default = defaultEntries.reduce((acc, [key, entry]) => {
       return {
         ...acc,
@@ -306,10 +318,10 @@ export class ConfigGenerator {
           }
           return {
             ...acc,
-            [key]: entry
+            [key]: entry,
           } as ConfigMetricAlarms;
-        }, {} as ConfigMetricAlarms | ConfigLogGroupAlarms)
-      }
+        }, {} as ConfigMetricAlarms | ConfigLogGroupAlarms),
+      };
     }, {} as ConfigCustomDefaults);
 
     this.combineSingle(ConfigLocalType.Lambda, configNew);
@@ -335,7 +347,7 @@ export class ConfigGenerator {
           critical: {
             threshold: 1,
             evaluationPeriods: 1,
-          }
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -368,7 +380,7 @@ export class ConfigGenerator {
         metric: {
           period: { minutes: 5 },
           statistic: 'Average',
-        }
+        },
       },
       Throttles: {
         enabled: true,
@@ -539,7 +551,7 @@ export class ConfigGenerator {
           critical: {
             threshold: 90,
             evaluationPeriods: 1,
-          }
+          },
         },
         metric: {
           period: { minutes: 5 },
@@ -630,7 +642,7 @@ export class ConfigGenerator {
           critical: {
             threshold: 1,
             evaluationPeriods: 1,
-          }
+          },
         },
         metric: {
           period: { minutes: 5 },
