@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/nordcloud/mca-cli/compare/v1.3.0...v1.3.1) (2020-10-28)
+
+
+### Bug Fixes
+
+* Use args in setPagerdutyEndpoint ([93adcf9](https://github.com/nordcloud/mca-cli/commit/93adcf91d05f29d34cfa215c0c042bb64c1bc2e5))
+
 ## [1.3.0](https://github.com/nordcloud/mca-cli/compare/v1.2.1...v1.3.0) (2020-10-28)
 
 
