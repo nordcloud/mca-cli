@@ -33,10 +33,10 @@ test('generate config without profile or region', t => {
   };
   const conf = new config.ConfigGenerator(args);
   t.is(conf.getConfig().cli.version, 1);
-  t.is(conf.getConfig().cli.profile, undefined);
+  t.is(conf.getConfig().cli.profile, '');
 });
 
-test('add endpoint', t => {
+test('add endpoint', async t => {
   const args = {
     config: 'test',
     service: ['lambda'],
@@ -48,6 +48,6 @@ test('add endpoint', t => {
     verbose: false,
   };
   const conf = new config.ConfigGenerator(args);
-  conf.setPagerDutyEndpoint(args);
-  t.is(conf.getConfig().custom.snsTopic.endpoints.length, 1);
+  await conf.setPagerDutyEndpoint(args);
+  t.is(conf.getConfig().custom.snsTopic?.critical?.endpoints?.length, 1);
 });
