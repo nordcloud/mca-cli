@@ -15,3 +15,10 @@ test('Validate match log', t => {
   const excl = ['*dev*'];
   t.deepEqual(match(str, inc, excl), false);
 });
+
+test('Validate log group match with /', t => {
+  const str = '/aws/lambda/lambda-dev';
+  const inc: string[] = [];
+  const excl = ['/aws/*/lambda-dev'];
+  t.deepEqual(match(str, inc, excl), false);
+});
