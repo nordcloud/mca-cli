@@ -30,15 +30,15 @@
     "handlebars": "^4.7.6",
     "inquirer": "^7.1.0",
     "js-yaml": "^3.13.1",
-    "micromatch": "^4.0.2",
+    "picomatch": "^2.2.2",
     "yargs": "^15.1.0"
   },
   "devDependencies": {
     "@types/diff": "^4.0.2",
     "@types/inquirer": "^6.5.0",
     "@types/js-yaml": "^3.12.2",
-    "@types/micromatch": "^4.0.1",
     "@types/node": "^13.7.0",
+    "@types/picomatch": "^2.2.1",
     "@types/yargs": "^15.0.3",
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^2.20.0",

@@ -1,5 +1,7 @@
-import { isMatch } from 'micromatch';
+import { isMatch } from 'picomatch';
 
+// This fix is needed for picomatch library
+// Otherwise there will be error when matching log groups for example
 function fixMatchString(str: string): string {
   return str.replace(/\//g, '-');
 }
