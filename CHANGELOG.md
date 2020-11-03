@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/nordcloud/mca-cli/compare/v1.3.1...v1.3.2) (2020-11-03)
+
+
+### Bug Fixes
+
+* Endpoints from args and config are combined ([#6](https://github.com/nordcloud/mca-cli/issues/6)) ([68ba692](https://github.com/nordcloud/mca-cli/commit/68ba6929421c7ab0670961c2771f633ef13bca36))
+* Match properly when using / in include/exclude ([#5](https://github.com/nordcloud/mca-cli/issues/5)) ([861e9d6](https://github.com/nordcloud/mca-cli/commit/861e9d61fc306eb0fc0505424a3848aacbf4874c))
+
 ### [1.3.1](https://github.com/nordcloud/mca-cli/compare/v1.3.0...v1.3.1) (2020-10-28)
 
 
