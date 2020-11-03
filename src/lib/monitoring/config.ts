@@ -90,7 +90,7 @@ export class ConfigGenerator {
         );
         const newTopic = {
           ...topic,
-          endpoints: endpoints.filter(e => e) as string[],
+          endpoints: [...new Set([...(topic.endpoints || []), ...endpoints].filter(e => e))] as string[],
         };
         return [topicKey, newTopic];
       }),

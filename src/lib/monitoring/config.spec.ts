@@ -51,3 +51,44 @@ test('add endpoint', async t => {
   await conf.setPagerDutyEndpoint(args);
   t.is(conf.getConfig().custom.snsTopic?.critical?.endpoints?.length, 1);
 });
+
+test('Combine earlier endpoints', async t => {
+  const args = {
+    config: 'test',
+    service: ['lambda'],
+    stage: 'dev',
+    endpoints: ['https://events.pagerduty.com/integration/abcb/enqueue'],
+    include: [],
+    exclude: [],
+    dry: true,
+    verbose: false,
+  };
+  const conf = new config.ConfigGenerator(args);
+  await conf.setPagerDutyEndpoint(args);
+
+  // Add second endpoint
+  args.endpoints = ['https://events.pagerduty.com/integration/abcb/enqueue2'];
+  await conf.setPagerDutyEndpoint(args);
+
+  t.is(conf.getConfig().custom.snsTopic?.critical?.endpoints?.length, 2);
+});
+
+test('Combine earlier endpoints should filter out same endpoints', async t => {
+  const args = {
+    config: 'test',
+    service: ['lambda'],
+    stage: 'dev',
+    endpoints: ['https://events.pagerduty.com/integration/abcb/enqueue'],
+    include: [],
+    exclude: [],
+    dry: true,
+    verbose: false,
+  };
+  const conf = new config.ConfigGenerator(args);
+  await conf.setPagerDutyEndpoint(args);
+
+  // Add same endpoints again
+  await conf.setPagerDutyEndpoint(args);
+
+  t.is(conf.getConfig().custom.snsTopic?.critical?.endpoints?.length, 1);
+});
