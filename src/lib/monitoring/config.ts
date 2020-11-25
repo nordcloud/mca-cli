@@ -40,6 +40,7 @@ export class ConfigGenerator {
             id: args.profile ? `${args.profile}-alerts-alarm-${args.stage}` : `alerts-alarm-${args.stage}`,
             endpoints: [],
             emails: [],
+            slackWebhook: '',
           },
         },
       },

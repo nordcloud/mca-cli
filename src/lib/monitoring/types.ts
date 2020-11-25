@@ -197,6 +197,7 @@ export interface ConfigCustomSNS {
   name: string;
   emails?: string[];
   endpoints?: string[];
+  slackWebhook?: string;
 }
 
 export interface ConfigCustom {
