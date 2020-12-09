@@ -8,22 +8,24 @@
     "deploy": "cdk {{#if profile}}--profile {{ profile }} {{/if}}deploy"
   },
   "devDependencies": {
-    "@aws-cdk/aws-cloudformation": "^1.75.0",
-    "@aws-cdk/aws-cloudwatch": "^1.75.0",
-    "@aws-cdk/aws-cloudwatch-actions": "^1.75.0",
-    "@aws-cdk/aws-dynamodb": "^1.75.0",
-    "@aws-cdk/aws-lambda": "^1.75.0",
-    "@aws-cdk/aws-logs": "^1.75.0",
-    "@aws-cdk/aws-sns": "^1.75.0",
-    "@aws-cdk/aws-sns-subscriptions": "^1.75.0",
-    "@aws-cdk/core": "^1.75.0",
+    "@aws-cdk/aws-cloudformation": "~1.75.0",
+    "@aws-cdk/aws-cloudwatch": "~1.75.0",
+    "@aws-cdk/aws-cloudwatch-actions": "~1.75.0",
+    "@aws-cdk/aws-dynamodb": "~1.75.0",
+    "@aws-cdk/aws-lambda": "~1.75.0",
+    "@aws-cdk/aws-lambda-nodejs": "~1.75.0",
+    "@aws-cdk/aws-logs": "~1.75.0",
+    "@aws-cdk/aws-sns": "~1.75.0",
+    "@aws-cdk/aws-sns-subscriptions": "~1.75.0",
+    "@aws-cdk/core": "~1.75.0",
     "@types/node": "^12.12.62",
-    "aws-cdk": "^1.75.0",
+    "aws-cdk": "~1.75.0",
     "esbuild": "^0.8.15",
+    "node-fetch": "^2.6.1",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
   },
   "dependencies": {
-    "mca-monitoring": "https://github.com/nordcloud/mca-monitoring/releases/download/v0.1.1/mca-monitoring-0.1.1.tgz"
+    "mca-monitoring": "https://github.com/nordcloud/mca-monitoring/releases/download/v0.1.1/mca-monitoring-0.1.2.tgz"
   }
 }
