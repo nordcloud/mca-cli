@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/nordcloud/mca-cli/compare/v1.3.2...v1.4.0) (2020-12-09)
+
+
+### Features
+
+* add support for slack alert notifications ([8560840](https://github.com/nordcloud/mca-cli/commit/856084032eec1b0ae7ab7c43d934df594e5499e6))
+
 ### [1.3.2](https://github.com/nordcloud/mca-cli/compare/v1.3.1...v1.3.2) (2020-11-03)
 
 

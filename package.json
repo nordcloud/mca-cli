@@ -1,6 +1,6 @@
 {
   "name": "mca-cli",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "CLI application for MCA team",
   "author": "Nordcloud Managed Cloud Applications",
   "license": "MIT",
