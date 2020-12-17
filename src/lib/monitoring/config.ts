@@ -14,7 +14,6 @@ import {
   ConfigLogGroupAlarms,
 } from './types';
 import descriptions from './alarmDescriptions';
-import { defaultAlarmDescriptionTemplate } from './alarmDescriptions';
 import { Args, AWSItem } from './types';
 import diff from './diff';
 
@@ -22,7 +21,7 @@ type AlarmMetricConfig = ConfigLocals<ConfigMetricAlarms>;
 
 const defaultGenericCriticalConfig = {
   evaluationPeriods: 1,
-  alarmDescription: defaultAlarmDescriptionTemplate,
+  alarmDescription: descriptions.default,
 };
 
 export class ConfigGenerator {

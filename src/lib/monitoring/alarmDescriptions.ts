@@ -1,4 +1,4 @@
-export const defaultAlarmDescriptionTemplate = `
+const defaultAlarmDescriptionTemplate = `
 Consider the following:
 - Be precise: character limit of 1024 for the alert description
 - Actionability: Is it actionable, is the alert even needed?
@@ -53,6 +53,7 @@ const lambdaThrottlesAlarmDescriptionTemplate = `
 `.trim();
 
 export default {
+  default: defaultAlarmDescriptionTemplate,
   lambda: {
     errors: lambdaErrorsAlarmDescriptionTemplate,
     duration: lambdaDurationAlarmDescriptionTemplate,
