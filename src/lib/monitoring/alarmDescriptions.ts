@@ -1,4 +1,4 @@
-const defaultAlarmDescriptionTemplate = `
+export const defaultAlarmDescriptionTemplate = `
 Consider the following:
 - Be precise: character limit of 1024 for the alert description
 - Actionability: Is it actionable, is the alert even needed?
@@ -6,7 +6,7 @@ Consider the following:
 - Reusability: If instruction is generic open a PR to mca-cli :)
 `.trim();
 
-const lambdaErrorsAlarmDescriptionTemplate = `
+export const lambdaErrorsAlarmDescriptionTemplate = `
 - Evaluate the criticality of alert:
   * Check the amount of errors
   * If there are a lot of errors inform the product owner immediately
@@ -22,7 +22,7 @@ const lambdaErrorsAlarmDescriptionTemplate = `
   * If not create one
 `.trim();
 
-const lambdaDurationAlarmDescriptionTemplate = `
+export const lambdaDurationAlarmDescriptionTemplate = `
 - Check metric history for changes to durations
 - Evaluate whether alarm threshold or applications needs to change
 - CloudWatch Insights query to find offending durations:
@@ -31,7 +31,7 @@ const lambdaDurationAlarmDescriptionTemplate = `
   | filter @duration > durationThresholdHere
 `.trim();
 
-const lambdaInvocationsAlarmDescriptionTemplate = `
+export const lambdaInvocationsAlarmDescriptionTemplate = `
 - Check metric history for changes to invocations
 - Evaluate whether alarm threshold or applications needs to change
 - CloudWatch Insights query to check the invocation counts:
@@ -41,7 +41,7 @@ const lambdaInvocationsAlarmDescriptionTemplate = `
   | stats count() by bin(5m)
 `.trim();
 
-const lambdaThrottlesAlarmDescriptionTemplate = `
+export const lambdaThrottlesAlarmDescriptionTemplate = `
 - Check metric history for throttles
 - Evaluate the severity
   * Check how retry logic has been implemented
@@ -52,12 +52,9 @@ const lambdaThrottlesAlarmDescriptionTemplate = `
   * Add retry logic if it's missing!
 `.trim();
 
-export default {
-  default: defaultAlarmDescriptionTemplate,
-  lambda: {
-    errors: lambdaErrorsAlarmDescriptionTemplate,
-    duration: lambdaDurationAlarmDescriptionTemplate,
-    invocations: lambdaInvocationsAlarmDescriptionTemplate,
-    throttles: lambdaThrottlesAlarmDescriptionTemplate,
-  },
+export const lambda = {
+  errors: lambdaErrorsAlarmDescriptionTemplate,
+  duration: lambdaDurationAlarmDescriptionTemplate,
+  invocations: lambdaInvocationsAlarmDescriptionTemplate,
+  throttles: lambdaThrottlesAlarmDescriptionTemplate,
 };
