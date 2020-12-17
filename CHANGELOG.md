@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/nordcloud/mca-cli/compare/v1.4.0...v1.5.0) (2020-12-17)
+
+
+### Features
+
+* add default descriptions to alerts ([#10](https://github.com/nordcloud/mca-cli/issues/10)) ([9465251](https://github.com/nordcloud/mca-cli/commit/946525199d6f01dee34db400de78ead64521bf32))
+
+
+### Bug Fixes
+
+* Fix package version for mca-monitoring ([#11](https://github.com/nordcloud/mca-cli/issues/11)) ([171e8d6](https://github.com/nordcloud/mca-cli/commit/171e8d67e36877d134d0dc6ddf69f6026509624f))
+
 ## [1.4.0](https://github.com/nordcloud/mca-cli/compare/v1.3.2...v1.4.0) (2020-12-09)
 
 
