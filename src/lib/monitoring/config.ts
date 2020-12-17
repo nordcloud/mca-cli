@@ -13,10 +13,17 @@ import {
   ConfigCustomDefaults,
   ConfigLogGroupAlarms,
 } from './types';
+import descriptions from './alarmDescriptions';
+import { defaultAlarmDescriptionTemplate } from './alarmDescriptions';
 import { Args, AWSItem } from './types';
 import diff from './diff';
 
 type AlarmMetricConfig = ConfigLocals<ConfigMetricAlarms>;
+
+const defaultGenericCriticalConfig = {
+  evaluationPeriods: 1,
+  alarmDescription: defaultAlarmDescriptionTemplate,
+};
 
 export class ConfigGenerator {
   private config: Config;
@@ -345,8 +352,9 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
+            alarmDescription: descriptions.lambda.errors,
             threshold: 1,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -359,8 +367,9 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
+            alarmDescription: descriptions.lambda.invocations,
             threshold: 1000,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -373,8 +382,9 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
+            alarmDescription: descriptions.lambda.duration,
             threshold: 2000,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -387,8 +397,9 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
+            alarmDescription: descriptions.lambda.throttles,
             threshold: 1,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -431,8 +442,8 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 100,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -445,8 +456,8 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 200,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -459,8 +470,8 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 2000,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -473,8 +484,8 @@ export class ConfigGenerator {
         autoResolve: false,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 10,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -549,8 +560,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 90,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -562,8 +573,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 90,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -599,8 +610,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 1,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -640,8 +651,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 1,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -688,6 +699,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 75,
             evaluationPeriods: 5,
           },
@@ -702,8 +714,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 1000000000, // 1GB
-            evaluationPeriods: 1,
             comparisonOperator: 'LESS_THAN_THRESHOLD',
           },
         },
@@ -717,8 +729,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 25,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -731,8 +743,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 75000000, // 75MB
-            evaluationPeriods: 1,
             comparisonOperator: 'LESS_THAN_THRESHOLD',
           },
         },
@@ -746,8 +758,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 1,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -760,6 +772,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 2,
             evaluationPeriods: 1,
           },
@@ -774,8 +787,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 60,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -807,7 +820,7 @@ export class ConfigGenerator {
     this.config = {
       ...this.config,
       rdsInstances: rdsInstances.reduce(
-        (acc, i) => ({ ...acc, [i.DBInstanceIdentifier || '']: {} }),
+        (acc, instance) => ({ ...acc, [instance.DBInstanceIdentifier || '']: {} }),
         {} as AlarmMetricConfig,
       ),
       custom: {
@@ -831,8 +844,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 1,
-            evaluationPeriods: 1,
           },
         },
         metric: {
@@ -844,6 +857,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 75,
             evaluationPeriods: 5,
           },
@@ -858,6 +872,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 75,
             evaluationPeriods: 5,
           },
@@ -872,6 +887,7 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 20,
             evaluationPeriods: 1,
           },
@@ -928,8 +944,8 @@ export class ConfigGenerator {
         enabled: true,
         alarm: {
           critical: {
+            ...defaultGenericCriticalConfig,
             threshold: 10,
-            evaluationPeriods: 1,
           },
         },
         metric: {
