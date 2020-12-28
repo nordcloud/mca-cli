@@ -1,9 +1,8 @@
 import { Argv } from 'yargs';
 import { promises as fs } from 'fs';
-import * as path from 'path';
 
 import { aws } from '../../lib';
-import { setVerbose, highlight } from '../../lib/logger';
+import { setVerbose } from '../../lib/logger';
 
 export const command = 'export [options]';
 export const desc = 'Export cloudwatch info';
@@ -41,8 +40,8 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       alias: 'output',
       describe: 'Path to generated json file',
       type: 'string',
-      default: 'alarms.json'
-    }
+      default: 'alarms.json',
+    },
   });
 };
 
@@ -64,9 +63,9 @@ interface AlarmAcc {
         comparisonOperator: number;
         statistic: string;
         description: string;
-      }
-    }
-  }
+      };
+    };
+  };
 }
 
 export const handler = async (args: Args): Promise<void> => {
@@ -97,11 +96,11 @@ export const handler = async (args: Args): Promise<void> => {
             comparisonOperator: alarm.ComparisonOperator as string,
             statistic: alarm.Statistic,
             description: alarm.AlarmDescription || '',
-          }
-        }
-      }
+          },
+        },
+      },
     } as AlarmAcc;
-  }, {} as AlarmAcc)
+  }, {} as AlarmAcc);
 
   await fs.writeFile(args.output, JSON.stringify(parsed, null, 2));
 };
