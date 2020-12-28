@@ -54,13 +54,13 @@ interface Args {
   output: string;
 }
 
-interface AlarmAcc {
+interface AlarmExport {
   [level: string]: {
     [alarmName: string]: {
       [alarmType: string]: {
         threshold: number;
         period: number;
-        comparisonOperator: number;
+        comparisonOperator: string;
         statistic: string;
         description: string;
       };
@@ -99,8 +99,8 @@ export const handler = async (args: Args): Promise<void> => {
           },
         },
       },
-    } as AlarmAcc;
-  }, {} as AlarmAcc);
+    } as AlarmExport;
+  }, {} as AlarmExport);
 
   await fs.writeFile(args.output, JSON.stringify(parsed, null, 2));
 };
