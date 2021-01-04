@@ -87,9 +87,9 @@ export const handler = async (args: Args): Promise<void> => {
     return {
       ...acc,
       [alarmLevel]: {
-        ...(acc.critical || {}),
+        ...(acc[alarmLevel] || {}),
         [name]: {
-          ...(acc.critical?.[name] || {}),
+          ...(acc[alarmLevel]?.[name] || {}),
           [alarmType]: {
             threshold: alarm.Threshold as number,
             period: alarm.Period as number,
