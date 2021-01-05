@@ -3,48 +3,46 @@ import { validateCredentials } from './credentials';
 import { debug } from '../logger';
 import { match } from '../utils';
 
-export async function getCloudWatchMetricAlarms(
+export async function getCloudWatchAlarms(
   include?: string[],
   exclude?: string[],
-): Promise<AWS.CloudWatch.MetricAlarms> {
+): Promise<{ metricAlarms: AWS.CloudWatch.MetricAlarms, compositeAlarms: AWS.CloudWatch.CompositeAlarms }> {
   validateCredentials();
 
   const cw = new AWS.CloudWatch();
 
-  const ret: AWS.CloudWatch.MetricAlarms = [];
+  const metricAlarms: AWS.CloudWatch.MetricAlarms = [];
+  const compositeAlarms: AWS.CloudWatch.MetricAlarms = [];
 
-  debug('Getting CloudWatch metric alerts');
+  debug('Getting CloudWatch metric alarms');
   let NextToken: string | undefined;
   do {
     const res = await cw.describeAlarms({ NextToken }).promise();
-    ret.push(...(res.MetricAlarms || []));
+    metricAlarms.push(...(res.MetricAlarms || []));
+    compositeAlarms.push(...(res.CompositeAlarms || []));
 
     NextToken = res.NextToken;
   } while (NextToken);
-  debug(`Found ${ret.length} metric alerts`);
+  debug(`Found ${metricAlarms.length} metric and ${compositeAlarms.length} composite alarms`);
 
-  return ret.filter(alarm => match(alarm.AlarmName || '', include || [], exclude || []));
+  return {
+    metricAlarms: metricAlarms.filter(alarm => match(alarm.AlarmName || '', include || [], exclude || [])),
+    compositeAlarms: compositeAlarms.filter(alarm => match(alarm.AlarmName || '', include || [], exclude || [])),
+  }
+}
+
+export async function getCloudWatchMetricAlarms(
+  include?: string[],
+  exclude?: string[],
+): Promise<AWS.CloudWatch.MetricAlarms> {
+  const { metricAlarms } = await getCloudWatchAlarms(include, exclude);
+  return metricAlarms;
 }
 
 export async function getCloudWatchCompositeAlarms(
   include?: string[],
   exclude?: string[],
 ): Promise<AWS.CloudWatch.CompositeAlarms> {
-  validateCredentials();
-
-  const cw = new AWS.CloudWatch();
-
-  const ret: AWS.CloudWatch.CompositeAlarms = [];
-
-  debug('Getting CloudWatch composite alerts');
-  let NextToken: string | undefined;
-  do {
-    const res = await cw.describeAlarms({ NextToken }).promise();
-    ret.push(...(res.CompositeAlarms || []));
-
-    NextToken = res.NextToken;
-  } while (NextToken);
-  debug(`Found ${ret.length} composite alerts`);
-
-  return ret.filter(alarm => match(alarm.AlarmName || '', include || [], exclude || []));
+  const { compositeAlarms } = await getCloudWatchAlarms(include, exclude);
+  return compositeAlarms;
 }
