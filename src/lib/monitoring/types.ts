@@ -200,9 +200,25 @@ export interface ConfigCustomSNS {
   slackWebhook?: string;
 }
 
+export interface ConfigCustomBillingAlertOpt {
+  budgetLimit: number;
+  evaluationPeriods: number;
+  comparisonOperator: string;
+}
+
+export interface ConfigCustomBillingAlertMetricPeriod {
+  [key: string]: number;
+}
+
+export interface ConfigCustomBillingAlertMetric {
+  period: ConfigCustomBillingAlertMetricPeriod;
+  statistic: string;
+}
+
 export interface ConfigCustom {
   default: ConfigCustomDefaults;
   snsTopic: TopicMap<ConfigCustomSNS>;
+  billingAlert: ConfigMetricAlarm<ConfigCustomBillingAlertOpt, ConfigCustomBillingAlertMetric>;
 }
 
 export interface Config {
