@@ -49,6 +49,21 @@ export class ConfigGenerator {
             slackWebhook: '',
           },
         },
+        billingAlert: {
+          alarm: {
+            critical: {
+              budgetLimit: 10,
+              evaluationPeriods: 2,
+              comparisonOperator: 'GREATER_THAN_UPPER_THRESHOLD',
+            },
+          },
+          metric: {
+            period: {
+              minutes: 360,
+            },
+            statistic: 'Maximum',
+          },
+        },
       },
     };
 
