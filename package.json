@@ -14,7 +14,7 @@
     "assets/**/*"
   ],
   "scripts": {
-    "test": "ava",
+    "test": "ava --verbose --timeout=2m",
     "lint": "eslint . --ext ts",
     "lint:fix": "eslint . --ext ts --fix",
     "start": "tsc -w -p .",
