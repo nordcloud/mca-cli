@@ -6,7 +6,7 @@ import { match } from '../utils';
 export async function getCloudWatchAlarms(
   include?: string[],
   exclude?: string[],
-): Promise<{ metricAlarms: AWS.CloudWatch.MetricAlarms, compositeAlarms: AWS.CloudWatch.CompositeAlarms }> {
+): Promise<{ metricAlarms: AWS.CloudWatch.MetricAlarms; compositeAlarms: AWS.CloudWatch.CompositeAlarms }> {
   validateCredentials();
 
   const cw = new AWS.CloudWatch();
@@ -28,7 +28,7 @@ export async function getCloudWatchAlarms(
   return {
     metricAlarms: metricAlarms.filter(alarm => match(alarm.AlarmName || '', include || [], exclude || [])),
     compositeAlarms: compositeAlarms.filter(alarm => match(alarm.AlarmName || '', include || [], exclude || [])),
-  }
+  };
 }
 
 export async function getCloudWatchMetricAlarms(
