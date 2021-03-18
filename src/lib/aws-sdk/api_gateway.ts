@@ -7,9 +7,17 @@ export async function getRoutes(include: string[], exclude: string[]): Promise<A
   validateCredentials();
 
   const gateway = new AWS.APIGateway();
+  const apis: AWS.APIGateway.ListOfRestApi = [];
 
   debug('Getting api gateway routes');
-  const res = await gateway.getRestApis().promise();
-  debug('All api gateway routes count:', res?.items?.length || 0);
-  return (res?.items || []).filter(r => match(r.name || '', include, exclude));
+  let position: string | undefined;
+  do {
+    debug('Getting rest apis...');
+    const res = await gateway.getRestApis({ position }).promise();
+    apis.push(...(res.items || []));
+    position = res.position;
+  } while (position);
+
+  debug('All rest apis count:', apis?.length || 0);
+  return apis.filter(r => match(r.name || '', include, exclude));
 }
