@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/nordcloud/mca-cli/compare/v1.5.0...v1.6.0) (2021-03-18)
+
+
+### Features
+
+* [MCA-729] CloudWatch alarms export ([#12](https://github.com/nordcloud/mca-cli/issues/12)) ([ce8dee7](https://github.com/nordcloud/mca-cli/commit/ce8dee7e14c370e4b53592554402f6880623b4c9))
+
+
+### Bug Fixes
+
+* Fetch all api gateways ([#15](https://github.com/nordcloud/mca-cli/issues/15)) ([7aef957](https://github.com/nordcloud/mca-cli/commit/7aef95767f76576a7484117ee9836f642c2f60cd))
+
 ## [1.5.0](https://github.com/nordcloud/mca-cli/compare/v1.4.0...v1.5.0) (2020-12-17)
 
 
