@@ -6,14 +6,14 @@ import { match } from '../utils';
 export async function getGraphqlApis(include: string[], exclude: string[]): Promise<AWS.AppSync.GraphqlApis> {
   validateCredentials();
 
-  const appsync = new AWS.AppSync();
+  const appSync = new AWS.AppSync();
   const apis: AWS.AppSync.GraphqlApis = [];
 
   let nextToken: string | undefined;
 
   debug('Getting graphql apis...');
   do {
-    const res = await appsync.listGraphqlApis({ nextToken }).promise();
+    const res = await appSync.listGraphqlApis({ nextToken }).promise();
     apis.push(...(res.graphqlApis || []));
     nextToken = res.nextToken;
   } while (nextToken);

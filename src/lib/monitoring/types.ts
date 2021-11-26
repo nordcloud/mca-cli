@@ -191,7 +191,7 @@ export interface ConfigCustomDefaults {
   rds?: ConfigMetricAlarms;
   eks?: ConfigMetricAlarms;
   logGroup?: ConfigLogGroupAlarms;
-  appsyncApi?: ConfigMetricAlarms;
+  appSyncApi?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {
@@ -234,7 +234,7 @@ export interface Config {
   rdsInstances?: ConfigLocals<ConfigMetricAlarms>;
   eksClusters?: ConfigLocals<ConfigMetricAlarms>;
   logGroups?: ConfigLocals<ConfigLogGroupAlarms>;
-  appsyncApis?: ConfigLocals<ConfigMetricAlarms>;
+  appSyncApis?: ConfigLocals<ConfigMetricAlarms>;
 }
 
 export enum ConfigLocalType {
@@ -246,7 +246,7 @@ export enum ConfigLocalType {
   RdsInstance = 'rdsInstances',
   EksCluster = 'eksClusters',
   LogGroup = 'logGroups',
-  AppSync = 'appsyncApis',
+  AppSync = 'appSyncApis',
 }
 
 export enum ConfigDefaultType {
@@ -259,5 +259,5 @@ export enum ConfigDefaultType {
   RdsInstance = 'rds',
   EksCluster = 'eks',
   LogGroup = 'logGroup',
-  AppSync = 'appsyncApi'
+  AppSync = 'appSyncApi'
 }

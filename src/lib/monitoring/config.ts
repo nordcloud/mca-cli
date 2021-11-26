@@ -1013,12 +1013,12 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      appsyncApis: graphqlApis.reduce((acc, c) => ({ ...acc, [c.apiId || '']: {} }), {} as AlarmMetricConfig),
+      appSyncApis: graphqlApis.reduce((acc, c) => ({ ...acc, [c.apiId || '']: {} }), {} as AlarmMetricConfig),
       custom: {
         ...this.config.custom,
         default: {
           ...this.config.custom.default,
-          appsyncApi: defaultConfig,
+          appSyncApi: defaultConfig,
         },
       },
     };
