@@ -224,6 +224,8 @@ export class ConfigGenerator {
         return ConfigDefaultType.RdsInstance;
       case ConfigLocalType.EksCluster:
         return ConfigDefaultType.EksCluster;
+      case ConfigLocalType.AppSync:
+        return ConfigDefaultType.AppSync;
       default:
         return undefined;
     }
@@ -248,6 +250,8 @@ export class ConfigGenerator {
         return ConfigLocalType.RdsInstance;
       case ConfigDefaultType.EksCluster:
         return ConfigLocalType.EksCluster;
+      case ConfigDefaultType.AppSync:
+          return ConfigLocalType.AppSync;
       default:
         return undefined;
     }
@@ -354,6 +358,7 @@ export class ConfigGenerator {
     this.combineSingle(ConfigLocalType.RdsInstance, configNew);
     this.combineSingle(ConfigLocalType.EksCluster, configNew);
     this.combineSingle(ConfigLocalType.LogGroup, configNew);
+    this.combineSingle(ConfigLocalType.AppSync, configNew);
   }
 
   public addLambdas(aws: AWSItem): void {
@@ -987,6 +992,38 @@ export class ConfigGenerator {
     };
   }
 
+  public addGraphqlApis({ graphqlApis }: AWSItem): void {
+    if (graphqlApis.length === 0) {
+      return;
+    }
+
+    const defaultConfig = {
+      Latency: {
+        alarm: {
+          critical: {
+            threshold: 5000,
+            evaluationPeriods: 1,
+          },
+        },
+        metric: {
+          statistic: 'Average',
+        },
+      },
+    };
+
+    this.config = {
+      ...this.config,
+      appSyncApis: graphqlApis.reduce((acc, c) => ({ ...acc, [c.apiId || '']: {} }), {} as AlarmMetricConfig),
+      custom: {
+        ...this.config.custom,
+        default: {
+          ...this.config.custom.default,
+          appSyncApi: defaultConfig,
+        },
+      },
+    };
+  }
+
   public addAllLocal(aws: AWSItem): void {
     this.addLambdas(aws);
     this.addTables(aws);
@@ -997,5 +1034,6 @@ export class ConfigGenerator {
     this.addRDSInstances(aws);
     this.addEKSClusters(aws);
     this.addLogGroups(aws);
+    this.addGraphqlApis(aws);
   }
 }

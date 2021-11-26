@@ -11,6 +11,7 @@ export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
   const rdsInstances = service.indexOf('rds') !== -1 ? await aws.getRDSInstances(include, exclude) : [];
   const eksClusters = service.indexOf('eks') !== -1 ? await aws.getEKSClusters(include, exclude) : [];
   const logGroups = service.indexOf('loggroup') !== -1 ? await aws.getFilteredLogGroups(include, exclude) : [];
+  const graphqlApis = service.indexOf('appsync') !== -1 ? await aws.getGraphqlApis(include, exclude) : [];
 
   return {
     functions,
@@ -21,5 +22,6 @@ export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
     rdsInstances,
     eksClusters,
     logGroups,
+    graphqlApis,
   };
 }

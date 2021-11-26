@@ -9,3 +9,4 @@ export * from './logs';
 export * from './rds';
 export * from './eks';
 export * from './cloudwatch';
+export * from './appsync';
