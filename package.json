@@ -24,7 +24,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "aws-sdk": "^2.688.0",
+    "aws-sdk": "^2.814.0",
     "chalk": "^4.0.0",
     "diff": "^4.0.2",
     "handlebars": "^4.7.6",
