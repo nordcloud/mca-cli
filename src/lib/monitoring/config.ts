@@ -226,6 +226,8 @@ export class ConfigGenerator {
         return ConfigDefaultType.EksCluster;
       case ConfigLocalType.AppSync:
         return ConfigDefaultType.AppSync;
+      case ConfigLocalType.SQS:
+        return ConfigDefaultType.SQS;
       default:
         return undefined;
     }
@@ -252,6 +254,8 @@ export class ConfigGenerator {
         return ConfigLocalType.EksCluster;
       case ConfigDefaultType.AppSync:
           return ConfigLocalType.AppSync;
+      case ConfigDefaultType.SQS:
+          return ConfigLocalType.SQS;
       default:
         return undefined;
     }
@@ -359,6 +363,7 @@ export class ConfigGenerator {
     this.combineSingle(ConfigLocalType.EksCluster, configNew);
     this.combineSingle(ConfigLocalType.LogGroup, configNew);
     this.combineSingle(ConfigLocalType.AppSync, configNew);
+    this.combineSingle(ConfigLocalType.SQS, configNew);
   }
 
   public addLambdas(aws: AWSItem): void {
@@ -1024,6 +1029,36 @@ export class ConfigGenerator {
     };
   }
 
+  public addSQSQueues({ logGroups }: AWSItem): void {
+    if (logGroups.length === 0) {
+      return;
+    }
+
+    const defaultConfig = {
+      ApproximateAgeOfOldestMessage: { enabled: false },
+      ApproximateNumberOfMessagesDelayed: { enabled: false },
+      ApproximateNumberOfMessagesNotVisible: { enabled: false },
+      ApproximateNumberOfMessagesVisible: { enabled: false },
+      NumberOfEmptyReceives: { enabled: false },
+      NumberOfMessagesDeleted: { enabled: false },
+      NumberOfMessagesReceived: { enabled: false },
+      NumberOfMessagesSent: { enabled: false },
+      SentMessageSize: { enabled: false },
+    };
+
+    this.config = {
+      ...this.config,
+      logGroups: logGroups.reduce((acc, c) => ({ ...acc, [c.logGroupName || '']: {} }), {} as AlarmMetricConfig),
+      custom: {
+        ...this.config.custom,
+        default: {
+          ...this.config.custom.default,
+          logGroup: defaultConfig,
+        },
+      },
+    };
+  }
+
   public addAllLocal(aws: AWSItem): void {
     this.addLambdas(aws);
     this.addTables(aws);
@@ -1035,5 +1070,6 @@ export class ConfigGenerator {
     this.addEKSClusters(aws);
     this.addLogGroups(aws);
     this.addGraphqlApis(aws);
+    this.addSQSQueues(aws);
   }
 }

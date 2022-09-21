@@ -10,6 +10,7 @@ export interface AWSItem {
   eksClusters: AWS.EKS.StringList;
   logGroups: AWS.CloudWatchLogs.LogGroup[];
   graphqlApis: AWS.AppSync.GraphqlApis;
+  sqsQueues: string[];
 }
 
 export interface Args {
@@ -192,6 +193,7 @@ export interface ConfigCustomDefaults {
   eks?: ConfigMetricAlarms;
   logGroup?: ConfigLogGroupAlarms;
   appSyncApi?: ConfigMetricAlarms;
+  sqs?: ConfigMetricAlarms;
 }
 
 export interface ConfigCustomSNS {
@@ -235,6 +237,7 @@ export interface Config {
   eksClusters?: ConfigLocals<ConfigMetricAlarms>;
   logGroups?: ConfigLocals<ConfigLogGroupAlarms>;
   appSyncApis?: ConfigLocals<ConfigMetricAlarms>;
+  sqsQueues?: ConfigLocals<ConfigMetricAlarms>;
 }
 
 export enum ConfigLocalType {
@@ -247,6 +250,7 @@ export enum ConfigLocalType {
   EksCluster = 'eksClusters',
   LogGroup = 'logGroups',
   AppSync = 'appSyncApis',
+  SQS = 'sqsQueues',
 }
 
 export enum ConfigDefaultType {
@@ -259,5 +263,6 @@ export enum ConfigDefaultType {
   RdsInstance = 'rds',
   EksCluster = 'eks',
   LogGroup = 'logGroup',
-  AppSync = 'appSyncApi'
+  AppSync = 'appSyncApi',
+  SQS = 'sqs',
 }

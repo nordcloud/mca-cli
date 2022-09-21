@@ -37,7 +37,7 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       alias: 'service',
       describe: 'List of services',
       type: 'array',
-      choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks', 'loggroup', 'appsync'],
+      choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks', 'loggroup', 'appsync', 'sqs'],
     },
     d: {
       alias: 'dry',

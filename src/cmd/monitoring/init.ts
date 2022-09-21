@@ -38,8 +38,8 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       alias: 'service',
       describe: 'List of services. Write without quotes with space - example -s lambda rds eks',
       type: 'array',
-      choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks', 'loggroup', 'appsync'],
-      default: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks', 'loggroup', 'appsync'],
+      choices: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks', 'loggroup', 'appsync', 'sqs'],
+      default: ['lambda', 'dynamodb', 'ecs', 'apigateway', 'cloudfront', 'rds', 'eks', 'loggroup', 'appsync', 'sqs'],
     },
     d: {
       alias: 'dry',
