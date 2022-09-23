@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.4](https://github.com/nordcloud/mca-cli/compare/v1.6.3...v1.6.4) (2022-09-23)
+
+
+### Bug Fixes
+
+* sqs config; add default sqs alarm ([9066ceb](https://github.com/nordcloud/mca-cli/commit/9066ceb7bf7f0b2dbfad9a2a389760b2753e5675))
+
 ### [1.6.3](https://github.com/nordcloud/mca-cli/compare/v1.6.2...v1.6.3) (2022-09-05)
 
 ### [1.6.2](https://github.com/nordcloud/mca-cli/compare/v1.6.0...v1.6.2) (2021-11-26)
