@@ -10,3 +10,4 @@ export * from './rds';
 export * from './eks';
 export * from './cloudwatch';
 export * from './appsync';
+export * from './sqs';

@@ -12,6 +12,7 @@ export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
   const eksClusters = service.indexOf('eks') !== -1 ? await aws.getEKSClusters(include, exclude) : [];
   const logGroups = service.indexOf('loggroup') !== -1 ? await aws.getFilteredLogGroups(include, exclude) : [];
   const graphqlApis = service.indexOf('appsync') !== -1 ? await aws.getGraphqlApis(include, exclude) : [];
+  const sqsQueues = service.indexOf('sqs') !== -1 ? await aws.getSQSQueues(include, exclude) : [];
 
   return {
     functions,
@@ -23,5 +24,6 @@ export async function getAllFromAWS(args: types.Args): Promise<types.AWSItem> {
     eksClusters,
     logGroups,
     graphqlApis,
+    sqsQueues,
   };
 }

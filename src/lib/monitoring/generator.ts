@@ -103,6 +103,14 @@ export const logGenerateSuccess = (aws: AWSItem, args: Args, outputPath: string)
   aws.logGroups.forEach(g => {
     highlight('  -', g.logGroupName);
   });
+  highlight('GraphQL APIs:', aws.graphqlApis.length);
+  aws.graphqlApis.forEach(g => {
+    highlight('  -', g.apiId);
+  });
+  highlight('SQS Queues:', aws.sqsQueues.length);
+  aws.sqsQueues.forEach(queueName => {
+    highlight('  -', queueName);
+  });
   highlight('');
 };
 
