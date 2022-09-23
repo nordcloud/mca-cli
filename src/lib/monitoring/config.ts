@@ -1029,13 +1029,26 @@ export class ConfigGenerator {
     };
   }
 
-  public addSQSQueues({ logGroups }: AWSItem): void {
-    if (logGroups.length === 0) {
+  public addSQSQueues({ sqsQueues }: AWSItem): void {
+    if (sqsQueues.length === 0) {
       return;
     }
 
     const defaultConfig = {
-      ApproximateAgeOfOldestMessage: { enabled: false },
+      ApproximateAgeOfOldestMessage: { 
+        enabled: true,
+        alarm: {
+          critical: {
+            ...defaultGenericCriticalConfig,
+            threshold: 60,
+          },
+        },
+        metric: {
+          period: { minutes: 5 },
+          unit: 'Seconds',
+          statistic: 'Maximum',
+        },
+      },
       ApproximateNumberOfMessagesDelayed: { enabled: false },
       ApproximateNumberOfMessagesNotVisible: { enabled: false },
       ApproximateNumberOfMessagesVisible: { enabled: false },
@@ -1048,12 +1061,12 @@ export class ConfigGenerator {
 
     this.config = {
       ...this.config,
-      logGroups: logGroups.reduce((acc, c) => ({ ...acc, [c.logGroupName || '']: {} }), {} as AlarmMetricConfig),
+      sqsQueues: sqsQueues.reduce((acc, c) => ({ ...acc, [c || '']: {} }), {}),
       custom: {
         ...this.config.custom,
         default: {
           ...this.config.custom.default,
-          logGroup: defaultConfig,
+          sqs: defaultConfig,
         },
       },
     };
