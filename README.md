@@ -43,7 +43,7 @@ Run `npm run release` to make version bump, add tags and update CHANGELOG automa
 ## What is mca-cli?
 mca-cli and <a href="https://github.com/nordcloud/mca-monitoring">mca-monitoring</a> are used together to setup monitoring for resources in an AWS environment.
 
-The `mca monitoring` command searches for resources in an AWS environment. It generates a Node project inside your main project folder and creates a *config.yml* file inside it, which lists all the resources, along with some default alarms. 
+The `mca monitoring` command searches for resources in an AWS environment. It generates a Node project inside your main project folder and creates a *config.yml*, which lists all the resources, along with some default alarms. 
 
 ## How does monitoring work in AWS?
 
@@ -67,7 +67,7 @@ In the root project folder run
   <summary>Optional flags</summary>
 
   `--service` -
-  a space seperated list of service names to include in the search for resources By default all are included: By default all resources are included:
+  a space seperated list of service names to include in the search for resources. By default all resources are included:
   <ul>
     <li>lambda</li>
     <li>dynamodb</li>
@@ -108,7 +108,7 @@ In the *monitoring* folder run `npm install`
 
 In the *monitoring* folder run `npm run deploy`
 
-***
+***it
 
 ## Customizing monitoring
 <small>Read more about <a href="">CloudWatch concepts</a></small>
