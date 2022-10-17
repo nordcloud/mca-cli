@@ -20,7 +20,7 @@ jobs:
       with:
         args: >
          -Dsonar.organization=managedcloudapplications 
-         -Dsonar.projectKey=iac-app-junaliikennointi-ravi 
+         -Dsonar.projectKey=mca-cli
          -Dsonar.sources=. 
          -Dsonar.host.url=https://sonarcloud.io
       env:
