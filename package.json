@@ -30,7 +30,6 @@
     "handlebars": "^4.7.6",
     "inquirer": "^7.1.0",
     "js-yaml": "^3.13.1",
-    "mca-cli": "github:nordcloud/mca-cli",
     "picomatch": "^2.2.2",
     "yargs": "^15.1.0"
   },
