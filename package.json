@@ -27,7 +27,7 @@
     "aws-sdk": "^2.1219.0",
     "chalk": "^4.0.0",
     "diff": "^4.0.2",
-    "handlebars": "^4.7.6",
+    "handlebars": "^4.7.7",
     "inquirer": "^7.1.0",
     "js-yaml": "^3.13.1",
     "picomatch": "^2.2.2",
