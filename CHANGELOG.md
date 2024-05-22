@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.6](https://github.com/nordcloud/mca-cli/compare/v1.6.5...v1.6.6) (2024-05-22)
+
+
+### Bug Fixes
+
+* restrict TypeScript to local type definitions ([284c1c2](https://github.com/nordcloud/mca-cli/commit/284c1c2ace9638016579414b6b0c8e201ebaa0a3))
+
 ### [1.6.5](https://github.com/nordcloud/mca-cli/compare/v1.6.4...v1.6.5) (2022-11-28)
 
 ### [1.6.4](https://github.com/nordcloud/mca-cli/compare/v1.6.3...v1.6.4) (2022-09-23)
