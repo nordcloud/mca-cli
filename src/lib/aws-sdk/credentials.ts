@@ -144,6 +144,10 @@ export async function setAWSCredentials(profile?: string, region?: string): Prom
       sources.push(() => new AWS.SharedIniFileCredentials({ filename: credentialsFileName(), profile, tokenCodeFn }));
     }
 
+    if (await canRead(configFileName())) {
+      sources.push(() => new AWS.SsoCredentials({ filename: configFileName(), profile }));
+    }
+
     const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();
     AWS.config.update({ credentials });
   } catch (err) {
