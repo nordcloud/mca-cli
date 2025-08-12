@@ -134,18 +134,18 @@ function environmentCredentials(prefix: string): () => AWS.EnvironmentCredential
 /**
  * Set credentials and region to AWS from config and env variables
  */
-export async function setAWSCredentials(profile?: string, region?: string): Promise<void> {
+export async function setAWSCredentials(profile?: string, region?: string, sso?: boolean): Promise<void> {
   try {
     const sources: (() => AWS.Credentials)[] = [environmentCredentials('AWS'), environmentCredentials('AMAZON')];
 
     profile = profile || process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || 'default';
 
-    if (await canRead(credentialsFileName())) {
+    if (!sso && await canRead(credentialsFileName())) {
       sources.push(() => new AWS.SharedIniFileCredentials({ filename: credentialsFileName(), profile, tokenCodeFn }));
-    }
-
-    if (await canRead(configFileName())) {
-      sources.push(() => new AWS.SsoCredentials({ filename: configFileName(), profile }));
+    } else if (sso && await canRead(configFileName())) {
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
+      const ssoProfile = profile !== (AWS as any).util.defaultProfile ? 'profile ' + profile : profile;
+      sources.push(() => new AWS.SsoCredentials({ filename: configFileName(), profile: ssoProfile }));
     }
 
     const credentials = await new AWS.CredentialProviderChain(sources).resolvePromise();

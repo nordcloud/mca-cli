@@ -25,6 +25,7 @@ export interface Args {
   region?: string;
   dry: boolean;
   verbose: boolean;
+  sso?: boolean;
 }
 
 /**

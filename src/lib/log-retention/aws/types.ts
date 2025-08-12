@@ -11,4 +11,5 @@ export interface CmdParams {
   prefix: string;
   retention: number;
   region: string;
+  sso: boolean;
 }

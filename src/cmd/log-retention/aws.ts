@@ -31,10 +31,15 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
         default: false,
         type: 'boolean',
       },
+      sso: {
+        default: false,
+        describe: 'Use an AWS profile with SSO credentials',
+        type: 'boolean',
+      },
     });
 };
 
 export const handler = async (args: types.CmdParams): Promise<void> => {
-  await setAWSCredentials(args.profile, args.region);
+  await setAWSCredentials(args.profile, args.region, args.sso);
   SetRetentions(args);
 };

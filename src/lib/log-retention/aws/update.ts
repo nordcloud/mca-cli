@@ -6,7 +6,7 @@ export function ValidatePrefix(logGroupName: string, prefix: string): boolean {
 }
 
 export async function SetRetentions(args: CmdParams): Promise<void> {
-  await setAWSCredentials(args.profile, args.region);
+  await setAWSCredentials(args.profile, args.region, args.sso);
 
   const logGroups = await getLogGroups();
 

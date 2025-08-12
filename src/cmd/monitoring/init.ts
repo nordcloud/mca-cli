@@ -69,12 +69,17 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       default: false,
       type: 'boolean',
     },
+    sso: {
+      default: false,
+      describe: 'Use an AWS profile with SSO credentials',
+      type: 'boolean',
+    },
   });
 };
 
 export const handler = async (args: monitoring.Args): Promise<void> => {
   setVerbose(args.verbose);
-  await aws.setAWSCredentials(args.profile, args.region);
+  await aws.setAWSCredentials(args.profile, args.region, args.sso);
 
   const awsConfig = await monitoring.getAllFromAWS(args);
 
