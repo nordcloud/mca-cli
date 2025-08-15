@@ -67,6 +67,11 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       default: false,
       type: 'boolean',
     },
+    sso: {
+      default: false,
+      describe: 'Use an AWS profile with SSO credentials',
+      type: 'boolean',
+    },
   });
 };
 

@@ -66,6 +66,8 @@ In the root project folder run
 <details>
   <summary>Optional flags</summary>
 
+  `--sso`: a boolean flag indicating if the provided AWS profile should be used with SSO credentials. Default value is `false`.
+
   `--service` -
   a space seperated list of service names to include in the search for resources. By default all resources are included:
   <ul>

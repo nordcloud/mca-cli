@@ -42,6 +42,11 @@ export const builder = (yargs: Argv<{}>): Argv<{}> => {
       type: 'string',
       default: 'alarms.json',
     },
+    sso: {
+      default: false,
+      describe: 'Use an AWS profile with SSO credentials',
+      type: 'boolean',
+    },
   });
 };
 
@@ -52,6 +57,7 @@ interface Args {
   include: string[];
   exclude: string[];
   output: string;
+  sso?: boolean;
 }
 
 interface AlarmExport {
@@ -70,7 +76,7 @@ interface AlarmExport {
 
 export const handler = async (args: Args): Promise<void> => {
   setVerbose(args.verbose);
-  await aws.setAWSCredentials(args.profile, args.region);
+  await aws.setAWSCredentials(args.profile, args.region, args.sso);
 
   const alarms = await aws.getCloudWatchMetricAlarms(args.include, args.exclude);
   const parsed = alarms.reduce((acc, alarm) => {
