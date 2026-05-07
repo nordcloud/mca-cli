@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import yargs from 'yargs';
 import { validateCommand } from '../lib/utils';
+import { ArgV } from '../lib/utils/validate-command';
 
 interface PkgJson {
   version: string;
@@ -18,7 +19,7 @@ yargs
   .commandDir(path.join(__dirname, '..', 'cmd'))
   .demandCommand()
   .check(function(argv) {
-    if (!validateCommand(argv)) {
+    if (!validateCommand(argv as ArgV)) {
       throw new Error('Invalid request');
     }
     return true;

@@ -135,7 +135,7 @@ export class ConfigGenerator {
    */
   public async loadFromFile(configPath: string): Promise<void> {
     const content = await fs.readFile(configPath);
-    this.config = yaml.load(content);
+    this.config = yaml.load(content) as any;
   }
 
   /**
