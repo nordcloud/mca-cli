@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master ]
 
+permissions:
+  contents: read
+
 jobs:
   linter:
     runs-on: ubuntu-latest
@@ -28,3 +31,45 @@ jobs:
         node-version: 18
     - run: npm ci
     - run: npm run test
+
+  scan:
+    runs-on: ubuntu-latest
+    # Skip for dependabot PRs and forks
+    if: >-
+      github.actor != 'dependabot[bot]'
+      && (github.event_name == 'push'
+      || github.event.pull_request.head.repo.full_name == github.repository)
+    env:
+      MEND_EMAIL: ${{secrets.MEND_EMAIL}}
+      MEND_USER_KEY: ${{secrets.MEND_USER_KEY}}
+      MEND_URL: ${{secrets.MEND_URL}}
+      MEND_ORGNAME: ${{secrets.MEND_ORGNAME}}
+      MEND_PRODUCTNAME: ${{secrets.MEND_PRODUCTNAME}}
+      MEND_PROJECTNAME: ${{secrets.MEND_PROJECTNAME}}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - run: npm ci
+    - name: Download Mend CLI
+      run: |
+        curl -sSf https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend
+        chmod +x /usr/local/bin/mend
+    - name: Mend baseline scan
+      if: github.event_name == 'push'
+      run: |
+        echo Run Mend dependencies scan
+        mend dep --dir . --scope "$MEND_ORGNAME//$MEND_PRODUCTNAME//$MEND_PROJECTNAME" --export-results "mend_report.json" --update
+        echo Run Mend code scan
+        mend code --dir . --scope "$MEND_ORGNAME//$MEND_PRODUCTNAME//$MEND_PROJECTNAME" --report --formats "csv,html" --filename "mend_report"
+    - name: Mend PR scan
+      if: github.event_name == 'pull_request'
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        # Branch names might contain slashes
+        SAFE_REF="${HEAD_REF//\//-}"
+        echo Run Mend code scan
+        mend code --dir . --scope "$MEND_ORGNAME//$MEND_PRODUCTNAME//${MEND_PROJECTNAME}_${SAFE_REF}" --report --formats "csv,html" --filename "mend_report"
