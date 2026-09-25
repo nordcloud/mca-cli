@@ -18,7 +18,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm ci --ignore-scripts
+    - run: npm run build
     - run: npm run lint
 
   test:
@@ -29,7 +30,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm ci --ignore-scripts
     - run: npm run test
 
   mend_scan:
@@ -52,7 +53,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm ci --ignore-scripts
     - name: Download Mend CLI
       run: |
         curl -sSf https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend
@@ -91,7 +92,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm ci --ignore-scripts
     - name: Download Snyk CLI
       run: npm i -g snyk@1.1307.4
     - name: Snyk baseline scan
