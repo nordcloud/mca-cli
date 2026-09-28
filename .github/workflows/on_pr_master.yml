@@ -18,7 +18,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm ci --ignore-scripts
+    - run: npm run build
     - run: npm run lint
 
   test:
@@ -29,10 +30,10 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm ci --ignore-scripts
     - run: npm run test
 
-  scan:
+  mend_scan:
     runs-on: ubuntu-latest
     # Skip for dependabot PRs and forks
     if: >-
@@ -52,7 +53,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm ci --ignore-scripts
     - name: Download Mend CLI
       run: |
         curl -sSf https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend
@@ -73,3 +74,38 @@ jobs:
         SAFE_REF="${HEAD_REF//\//-}"
         echo Run Mend code scan
         mend code --dir . --scope "$MEND_ORGNAME//$MEND_PRODUCTNAME//${MEND_PROJECTNAME}_${SAFE_REF}" --report --formats "csv,html" --filename "mend_report"
+
+  snyk_scan:
+    runs-on: ubuntu-latest
+    # Skip for dependabot PRs and forks
+    if: >-
+      github.actor != 'dependabot[bot]'
+      && (github.event_name == 'push'
+      || github.event.pull_request.head.repo.full_name == github.repository)
+    env:
+      SNYK_CFG_ORG: ${{ secrets.SNYK_CFG_ORG }}
+      SNYK_API: ${{ secrets.SNYK_API }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - run: npm ci --ignore-scripts
+    - name: Download Snyk CLI
+      run: npm i -g snyk@1.1307.4
+    - name: Snyk baseline scan
+      if: github.event_name == 'push'
+      run: |
+        snyk monitor --project-name="mca-cli"
+        snyk code test --report --project-name="mca-cli" || [ $? -eq 1 ]
+    - name: Snyk PR scan
+      if: github.event_name == 'pull_request'
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        # Branch names might contain slashes
+        SAFE_REF="${HEAD_REF//\//-}"
+        snyk monitor --project-name="mca-cli" --target-reference="${SAFE_REF}"
+        snyk code test --report --project-name="mca-cli" --target-reference="${SAFE_REF}" || [ $? -eq 1 ]
