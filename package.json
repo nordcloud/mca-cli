@@ -26,7 +26,7 @@
   "dependencies": {
     "aws-sdk": "^2.1219.0",
     "chalk": "^4.0.0",
-    "diff": "^4.0.2",
+    "diff": "^8.0.3",
     "handlebars": "^4.7.6",
     "inquirer": "^7.1.0",
     "js-yaml": "^3.13.1",
